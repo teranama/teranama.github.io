@@ -26,10 +26,13 @@
 
   <script type="text/babel">
     const { useMemo, useRef, useState, useEffect } = React;
-// --- Google Form config ---
-// Replace ENTRY_FIELD with your real entry id (e.g., entry.1234567890)
+// === Google Form + Google Sheets integration ===
+// 1) Replace ENTRY_FIELD with your entry id (e.g., entry.1234567890)
+// 2) Replace SHEET_CSV_URL with your published CSV URL
 const FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSegYw7XM53KU9KK0FwDnqIgnau2zYitQf8fOBS-EzhIYG4fMQ/formResponse";
 const ENTRY_FIELD = "entry.REPLACE_ME";
+// Example: https://docs.google.com/spreadsheets/d/<SHEET_ID>/export?format=csv&gid=<GID>
+const SHEET_CSV_URL = "PASTE_YOUR_PUBLISHED_SHEET_CSV_URL";
 
 function postToGoogleForm(text) {
   if (!text || !text.trim()) return;
@@ -42,13 +45,31 @@ function postToGoogleForm(text) {
   }).catch(()=>{});
 }
 
+async function fetchSheetCSV(url) {
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    const text = await res.text();
+    // naive CSV parse: split lines, take last non-empty column as message
+    const lines = text.split(/\r?\n/).filter(Boolean);
+    // skip header if present
+    const rows = lines.slice(1).map(line => {
+      // simple CSV split (no quotes handling); Forms CSV is simple enough for a single long-text field
+      const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/); // split on commas not inside quotes
+      // prefer last column (short answers use one field)
+      let cell = cols[cols.length - 1] || "";
+      // remove surrounding quotes
+      cell = cell.replace(/^"(.*)"$/s, "$1").replace(/""/g, '"');
+      return cell.trim();
+    }).filter(Boolean);
+    return rows.reverse(); // newest first
+  } catch (e) {
+    return [];
+  }
+}
+
 
     function RatanamaPlayground() {
-      const [posts, setPosts] = useState([
-        "ሰላም! ይህ ቦታ ሙከራ ነው. ይህ መተግበሪያ እንዴት ይመስላችኋል?",
-        "በእርግጥ ቀላል እና ፈጣን ነው:: ጥሩነው::",
-        "በመንካት አንዱን ቁልፍ ይምረጡ እና ቀላል ለመ ስራ ነው። ይቀጥሉ ይርሱ:: እመኛለሁ እባኮትን ልብ ይበሉ::",
-      ]);
+      const [posts, setPosts] = useState([]);
       const [inputText, setInputText] = useState("");
       const [helpOpen, setHelpOpen] = useState(false);
       const listRef = useRef(null);
@@ -167,7 +188,16 @@ function postToGoogleForm(text) {
       };
 
       // tutorial hotkey
-      useEffect(() => {
+      
+  useEffect(() => {
+    (async () => {
+      if (SHEET_CSV_URL === "PASTE_YOUR_PUBLISHED_SHEET_CSV_URL") return;
+      const rows = await fetchSheetCSV(SHEET_CSV_URL);
+      if (rows.length) setPosts(rows);
+    })();
+  }, []);
+
+  useEffect(() => {
         const onKey = (e) => {
           if (e.key === '?' || (e.shiftKey && e.key === '/')) setHelpOpen(true);
           if (e.key === 'Escape') setHelpOpen(false);
@@ -246,7 +276,7 @@ function postToGoogleForm(text) {
         const trimmed = inputText.trim();
         if (!trimmed) return;
         setPosts(prev => [trimmed, ...prev]);
-        try { postToGoogleForm(trimmed); } catch(e) {}
+    try { postToGoogleForm(trimmed); } catch(e) {}
         setInputText("");
         requestAnimationFrame(() => listRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
         focusAtEnd();
