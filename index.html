@@ -15,6 +15,10 @@
     body { font-family: 'Noto Sans Ethiopic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif; }
     #app { min-height: 100dvh; }
     .keycap { white-space: nowrap; }
+  
+  /* row offsets for equal 10-wide keys without right gap */
+  .row-offset-05 { padding-left: 5%; margin-right: -5%; box-sizing: content-box; }
+  .row-offset-10 { padding-left: 10%; margin-right: -10%; box-sizing: content-box; }
   </style>
 </head>
 <body class="bg-[#FAFAFA] text-neutral-900">
@@ -202,8 +206,8 @@
       };
       useEffect(()=>{ showHUD(); });
 
-      const Row21 = ({ children }) => (
-        <div className="grid gap-0 w-full" style={{ gridTemplateColumns: 'repeat(21, minmax(0, 1fr))' }}>{children}</div>
+      const Row21 = ({ children, className="", styleExtra={} }) => (
+        <div className={"grid gap-0 w-full " + className} style={{ gridTemplateColumns: 'repeat(20, minmax(0, 1fr))', ...styleExtra }}>{children}</div>
       );
 
       const Section = ({title, children}) => (
@@ -278,7 +282,7 @@
             </Row21>
 
             {/* Row 2 */}
-            <Row21>
+            <Row21 className="row-offset-05">
               
               <div className="col-span-2"><Key labelArr={layout.A} onClick={()=>onKeyPress('A')} /></div>
               <div className="col-span-2"><Key labelArr={layout.S} onClick={()=>onKeyPress('S')} /></div>
@@ -288,8 +292,8 @@
               <div className="col-span-2"><Key labelArr={layout.H} onClick={()=>onKeyPress('H')} /></div>
               <div className="col-span-2"><Key labelArr={layout.J} onClick={()=>onKeyPress('J')} tone="vowel" hint="J" /></div>
               <div className="col-span-2"><Key labelArr={layout.K} onClick={()=>onKeyPress('K')} tone="vowel" hint="K" /></div>
-              <div className="col-span-2"><Key labelArr={layout.L} onClick={()=>onKeyPress('L')} tone="convert" hint="L" /></div>
-              <div className="col-span-2"></div>
+              <div className="col-span-3"><Key labelArr={layout.L} onClick={()=>onKeyPress('L')} tone="convert" hint="L" /></div>
+              
             </Row21>
 
             {/* Row 3 */}
