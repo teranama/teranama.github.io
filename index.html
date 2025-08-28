@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title> 체험 페이지 (v7 • ረዳት 포함)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -15,6 +15,21 @@
     body { font-family: 'Noto Sans Ethiopic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif; }
     #app { min-height: 100dvh; }
     .keycap { white-space: nowrap; }
+  
+/* --- mobile & iOS safe area tweaks --- */
+:root { --sab: env(safe-area-inset-bottom); }
+html, body { height: 100dvh; }
+body { overscroll-behavior-y: none; }
+/* bottom bar sticks to the bottom and avoids iOS home bar */
+.bottom-bar {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: calc(12px + var(--sab));
+  background: #FAFAFA;
+}
+/* give overall page bottom safe-space */
+.safe-bottom { padding-bottom: var(--sab); }
+
   </style>
 </head>
 <body class="bg-[#FAFAFA] text-neutral-900">
@@ -231,10 +246,13 @@
         focusAtEnd();
       };
       const clearInput = () => { setInputText(""); focusAtEnd(); };
-      useEffect(() => { focusAtEnd(); }, []);
+      useEffect(() => {
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (!isMobile) focusAtEnd();
+      }, []);
 
       return (
-        <div className="min-h-screen w-full flex flex-col">
+        <div className="min-h-screen w-full flex flex-col safe-bottom">
           {/* header */}
           <div className="flex items-center justify-between px-4 py-3">
             <h1 className="text-xl md:text-2xl font-semibold">ላታናማ የቁልፍ ሙከራ ገጽ</h1>
@@ -315,7 +333,7 @@
             </Row21>
 
             {/* bottom actions */}
-            <div className="grid grid-cols-2 gap-3 px-4 py-3 bg-[#FAFAFA]">
+            <div className="bottom-bar grid grid-cols-2 gap-3 px-4 py-3">
               <button onClick={savePost} className="h-[48px] rounded-xl bg-amber-400 hover:bg-amber-300 border border-amber-300 text-neutral-900 text-[16px] font-semibold">ግልጽ</button>
               <button onClick={clearInput} className="h-[48px] rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-[16px] font-medium">ንጽህና</button>
             </div>
@@ -335,22 +353,22 @@
   <section className="mb-6">
     <h3 className="text-lg font-semibold mb-2">አቀማመጥ</h3>
     <p className="mb-2">የድምፅ ቁልፎች፣ የቀጣይ ቁልፍ እና የወ ጥምረት ቁልፍ ቦታቸውን ያስታውሱ።</p>
-    <img src="/help/keyboard.png" alt="Keyboard" className="border rounded" />
+    <img src="img/help/keyboard.png" alt="Keyboard" className="border rounded" />
   </section>
   <section className="mb-6">
     <h3 className="text-lg font-semibold mb-2">የተከታታይ ፊደሎች መጻፍ</h3>
     <p className="mb-2">የፊደል ቡድን ቁልፍን ይጫኑ፣ ከዚያ ቀጣይ (≫) ሲጫኑ በዚያ ቁልፍ ያሉ ሌሎች ፊደሎች ይመራሉ።</p>
-    <img src="/help/ex1.png" alt="Example 1" />
+    <img src="img/help/ex1.png" alt="Example 1" />
   </section>
   <section className="mb-6">
     <h3 className="text-lg font-semibold mb-2">ድምፅ መቀየር</h3>
     <p className="mb-2">ሥር ፊደልን ከጻፉ በኋላ የሚፈለገውን ድምፅ ቁልፍ ይጫኑ።</p>
-    <img src="/help/ex2.png" alt="Example 2" />
+    <img src="img/help/ex2.png" alt="Example 2" />
   </section>
   <section>
     <h3 className="text-lg font-semibold mb-2">የወ ቤተሰብ ፊደሎች መጻፍ</h3>
     <p className="mb-2">ሥር ፊደልን ከጻፉ በኋላ የወ ቁልፍን እና ድምፅ ቁልፍን ተከታትለው ይጫኑ።</p>
-    <img src="/help/ex3.png" alt="Example 3" />
+    <img src="img/help/ex3.png" alt="Example 3" />
   </section>
 </div>
                 </div>
