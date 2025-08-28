@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title> 체험 페이지 (v7 • ረዳት 포함)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -16,20 +16,7 @@
     #app { min-height: 100dvh; }
     .keycap { white-space: nowrap; }
   
-/* --- mobile & iOS safe area tweaks --- */
-:root { --sab: env(safe-area-inset-bottom); }
-html, body { height: 100dvh; }
-body { overscroll-behavior-y: none; }
-/* bottom bar sticks to the bottom and avoids iOS home bar */
-.bottom-bar {
-  position: sticky;
-  bottom: 0;
-  padding-bottom: calc(12px + var(--sab));
-  background: #FAFAFA;
-}
-/* give overall page bottom safe-space */
-.safe-bottom { padding-bottom: var(--sab); }
-
+  .kb-wrap{ margin-bottom: 18px; }
   </style>
 </head>
 <body class="bg-[#FAFAFA] text-neutral-900">
@@ -216,10 +203,9 @@ body { overscroll-behavior-y: none; }
         tag.textContent = 'order=' + ord;
       };
       useEffect(()=>{ showHUD(); });
-      useEffect(()=>{ const kb=document.getElementById('kb-anchor'); kb&&kb.scrollIntoView({block:'nearest'}); }, []);
 
       const Row21 = ({ children }) => (
-        <div className="grid gap-0 w-full" style={{ gridTemplateColumns: 'repeat(21, minmax(0, 1fr))' }}>{children}</div>
+        <div className="grid gap-0 w-full" style={{ gridTemplateColumns: 'repeat(20, minmax(0, 1fr))' }}>{children}</div>
       );
 
       const Section = ({title, children}) => (
@@ -247,13 +233,10 @@ body { overscroll-behavior-y: none; }
         focusAtEnd();
       };
       const clearInput = () => { setInputText(""); focusAtEnd(); };
-      useEffect(() => {
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (!isMobile) focusAtEnd();
-      }, []);
+      useEffect(() => { focusAtEnd(); }, []);
 
       return (
-        <div className="min-h-screen w-full flex flex-col safe-bottom">
+        <div className="min-h-screen w-full flex flex-col">
           {/* header */}
           <div className="flex items-center justify-between px-4 py-3">
             <h1 className="text-xl md:text-2xl font-semibold">ላታናማ የቁልፍ ሙከራ ገጽ</h1>
@@ -264,7 +247,7 @@ body { overscroll-behavior-y: none; }
           </div>
 
           {/* posts */}
-          <div ref={listRef} className="mx-4 mb-1 rounded-xl bg-white border border-neutral-200 p-3 h-[260px] md:h-[320px] overflow-y-auto">
+          <div ref={listRef} className="mx-4 mb-2 rounded-xl bg-white border border-neutral-200 p-3 h-[260px] md:h-[320px] overflow-y-auto">
             {posts.map((p,i) => (
               <div key={i} className="mb-3">
                 <div className="whitespace-pre-wrap text-[15px] md:text-[16px] leading-6">{p}</div>
@@ -275,13 +258,13 @@ body { overscroll-behavior-y: none; }
           </div>
 
           {/* input */}
-          <div className="mx-4 mb-1">
+          <div className="mx-4 mb-2">
             <textarea ref={inputRef} value={inputText} onChange={e=>setInputText(e.target.value)} placeholder="እዚህ ጻፉ…" className="w-full h-[88px] md:h-[96px] resize-none rounded-xl border border-neutral-300 bg-white p-3 text-[16px] md:text-[18px] leading-6 focus:outline-none focus:ring-2 focus:ring-amber-300" />
           </div>
 
           {/* keyboard */}
-          <div id="kb-anchor"></div>
-          <div className="mt-1">
+          <div className="kb-wrap">\n          <div className="kb-wrap">
+          <div className="mt-auto">
             {/* Row 1 */}
             <Row21>
               <div className="col-span-2"><Key labelArr={layout.Q} onClick={()=>onKeyPress('Q')} /></div>
@@ -293,14 +276,14 @@ body { overscroll-behavior-y: none; }
               <div className="col-span-2"><Key labelArr={layout.U} onClick={()=>onKeyPress('U')} tone="vowel" hint="U" /></div>
               <div className="col-span-2"><Key labelArr={layout.I} onClick={()=>onKeyPress('I')} tone="vowel" hint="I" /></div>
               <div className="col-span-2"><Key labelArr={layout.O} onClick={()=>onKeyPress('O')} tone="vowel" hint="O" /></div>
-              <div className="col-span-3"><Key labelArr={layout.P} onClick={()=>onKeyPress('P')} tone="vowel" hint="P" /></div>
+              <div className="col-span-2"><Key labelArr={layout.P} onClick={()=>onKeyPress('P')} tone="vowel" hint="P" /></div>
               
             </Row21>
 
             {/* Row 2 */}
             <Row21>
               
-              <div className="col-span-3"><Key labelArr={layout.A} onClick={()=>onKeyPress('A')} /></div>
+              <div className="col-span-2"><Key labelArr={layout.A} onClick={()=>onKeyPress('A')} /></div>
               <div className="col-span-2"><Key labelArr={layout.S} onClick={()=>onKeyPress('S')} /></div>
               <div className="col-span-2"><Key labelArr={layout.D} onClick={()=>onKeyPress('D')} /></div>
               <div className="col-span-2"><Key labelArr={layout.F} onClick={()=>onKeyPress('F')} /></div>
@@ -308,7 +291,7 @@ body { overscroll-behavior-y: none; }
               <div className="col-span-2"><Key labelArr={layout.H} onClick={()=>onKeyPress('H')} /></div>
               <div className="col-span-2"><Key labelArr={layout.J} onClick={()=>onKeyPress('J')} tone="vowel" hint="J" /></div>
               <div className="col-span-2"><Key labelArr={layout.K} onClick={()=>onKeyPress('K')} tone="vowel" hint="K" /></div>
-              <div className="col-span-3"><Key labelArr={layout.L} onClick={()=>onKeyPress('L')} tone="convert" hint="L" /></div>
+              <div className="col-span-2"><Key labelArr={layout.L} onClick={()=>onKeyPress('L')} tone="convert" hint="L" /></div>
               <div className="col-span-2"></div>
             </Row21>
 
@@ -320,9 +303,9 @@ body { overscroll-behavior-y: none; }
               <div className="col-span-2"><Key labelArr={layout.C} onClick={()=>onKeyPress('C')} /></div>
               <div className="col-span-2"><Key labelArr={layout.V} onClick={()=>onKeyPress('V')} /></div>
               <div className="col-span-2"><Key labelArr={layout.B} onClick={()=>onKeyPress('B')} /></div>
-              <div className="col-span-3"><Key labelArr={layout.N} onClick={()=>onKeyPress('N')} /></div>
-              <div className="col-span-4"><Key labelArr={layout.M} onClick={()=>onKeyPress('M')} tone="convert" /></div>
-              <div className="col-span-4"><Key labelArr={["⌫"]} onClick={()=>backspace()} tone="dark" /></div>
+              <div className="col-span-2"><Key labelArr={layout.N} onClick={()=>onKeyPress('N')} /></div>
+              <div className="col-span-2"><Key labelArr={layout.M} onClick={()=>onKeyPress('M')} tone="convert" /></div>
+              <div className="col-span-2"><Key labelArr={["⌫"]} onClick={()=>backspace()} tone="dark" /></div>
               
             </Row21>
 
@@ -330,12 +313,12 @@ body { overscroll-behavior-y: none; }
             <Row21>
               <div className="col-span-4"><WideKey tone="dark" disabled>123</WideKey></div>
               <div className="col-span-12"><WideKey onClick={()=>space()}>Space</WideKey></div>
-              <div className="col-span-5"><WideKey tone="dark" onClick={()=>enter()}>⏎</WideKey></div>
-              
+              <div className="col-span-4"><WideKey tone="dark" onClick={()=>enter()}>⏎</WideKey></div>
+              <div className="col-span-1"></div>
             </Row21>
 
             {/* bottom actions */}
-            <div className="bottom-bar grid grid-cols-2 gap-3 px-4 py-3">
+            <div className="grid grid-cols-2 gap-3 px-4 py-3 bg-[#FAFAFA]">
               <button onClick={savePost} className="h-[48px] rounded-xl bg-amber-400 hover:bg-amber-300 border border-amber-300 text-neutral-900 text-[16px] font-semibold">ግልጽ</button>
               <button onClick={clearInput} className="h-[48px] rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-[16px] font-medium">ንጽህና</button>
             </div>
@@ -355,22 +338,22 @@ body { overscroll-behavior-y: none; }
   <section className="mb-6">
     <h3 className="text-lg font-semibold mb-2">አቀማመጥ</h3>
     <p className="mb-2">የድምፅ ቁልፎች፣ የቀጣይ ቁልፍ እና የወ ጥምረት ቁልፍ ቦታቸውን ያስታውሱ።</p>
-    <img src="img/help/keyboard.png" alt="Keyboard" className="border rounded" />
+    <img src="/help/keyboard.png" alt="Keyboard" className="border rounded" />
   </section>
   <section className="mb-6">
     <h3 className="text-lg font-semibold mb-2">የተከታታይ ፊደሎች መጻፍ</h3>
     <p className="mb-2">የፊደል ቡድን ቁልፍን ይጫኑ፣ ከዚያ ቀጣይ (≫) ሲጫኑ በዚያ ቁልፍ ያሉ ሌሎች ፊደሎች ይመራሉ።</p>
-    <img src="img/help/ex1.png" alt="Example 1" />
+    <img src="/help/ex1.png" alt="Example 1" />
   </section>
   <section className="mb-6">
     <h3 className="text-lg font-semibold mb-2">ድምፅ መቀየር</h3>
     <p className="mb-2">ሥር ፊደልን ከጻፉ በኋላ የሚፈለገውን ድምፅ ቁልፍ ይጫኑ።</p>
-    <img src="img/help/ex2.png" alt="Example 2" />
+    <img src="/help/ex2.png" alt="Example 2" />
   </section>
   <section>
     <h3 className="text-lg font-semibold mb-2">የወ ቤተሰብ ፊደሎች መጻፍ</h3>
     <p className="mb-2">ሥር ፊደልን ከጻፉ በኋላ የወ ቁልፍን እና ድምፅ ቁልፍን ተከታትለው ይጫኑ።</p>
-    <img src="img/help/ex3.png" alt="Example 3" />
+    <img src="/help/ex3.png" alt="Example 3" />
   </section>
 </div>
                 </div>
