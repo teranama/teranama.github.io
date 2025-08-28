@@ -26,6 +26,22 @@
 
   <script type="text/babel">
     const { useMemo, useRef, useState, useEffect } = React;
+// --- Google Form config ---
+// Replace ENTRY_FIELD with your real entry id (e.g., entry.1234567890)
+const FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSegYw7XM53KU9KK0FwDnqIgnau2zYitQf8fOBS-EzhIYG4fMQ/formResponse";
+const ENTRY_FIELD = "entry.REPLACE_ME";
+
+function postToGoogleForm(text) {
+  if (!text || !text.trim()) return;
+  const body = new URLSearchParams({ [ENTRY_FIELD]: text.trim() });
+  fetch(FORM_ACTION, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body
+  }).catch(()=>{});
+}
+
 
     function RatanamaPlayground() {
       const [posts, setPosts] = useState([
@@ -230,6 +246,7 @@
         const trimmed = inputText.trim();
         if (!trimmed) return;
         setPosts(prev => [trimmed, ...prev]);
+        try { postToGoogleForm(trimmed); } catch(e) {}
         setInputText("");
         requestAnimationFrame(() => listRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
         focusAtEnd();
