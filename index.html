@@ -293,14 +293,15 @@ body { overscroll-behavior-y: none; }
               <div className="col-span-2"><Key labelArr={layout.U} onClick={()=>onKeyPress('U')} tone="vowel" hint="U" /></div>
               <div className="col-span-2"><Key labelArr={layout.I} onClick={()=>onKeyPress('I')} tone="vowel" hint="I" /></div>
               <div className="col-span-2"><Key labelArr={layout.O} onClick={()=>onKeyPress('O')} tone="vowel" hint="O" /></div>
-              <div className="col-span-3"><Key labelArr={layout.P} onClick={()=>onKeyPress('P')} tone="vowel" hint="P" /></div>
+              <div className="col-span-2"><Key labelArr={layout.P} onClick={()=>onKeyPress('P')} tone="vowel" hint="P" /></div>
               
             </Row21>
 
             {/* Row 2 */}
             <Row21>
               
-              <div className="col-span-3"><Key labelArr={layout.A} onClick={()=>onKeyPress('A')} /></div>
+              <div className="col-span-1"></div>
+              <div className="col-span-2"><Key labelArr={layout.A} onClick={()=>onKeyPress('A')} /></div>
               <div className="col-span-2"><Key labelArr={layout.S} onClick={()=>onKeyPress('S')} /></div>
               <div className="col-span-2"><Key labelArr={layout.D} onClick={()=>onKeyPress('D')} /></div>
               <div className="col-span-2"><Key labelArr={layout.F} onClick={()=>onKeyPress('F')} /></div>
@@ -320,9 +321,9 @@ body { overscroll-behavior-y: none; }
               <div className="col-span-2"><Key labelArr={layout.C} onClick={()=>onKeyPress('C')} /></div>
               <div className="col-span-2"><Key labelArr={layout.V} onClick={()=>onKeyPress('V')} /></div>
               <div className="col-span-2"><Key labelArr={layout.B} onClick={()=>onKeyPress('B')} /></div>
-              <div className="col-span-3"><Key labelArr={layout.N} onClick={()=>onKeyPress('N')} /></div>
-              <div className="col-span-4"><Key labelArr={layout.M} onClick={()=>onKeyPress('M')} tone="convert" /></div>
-              <div className="col-span-4"><Key labelArr={["⌫"]} onClick={()=>backspace()} tone="dark" /></div>
+              <div className="col-span-2"><Key labelArr={layout.N} onClick={()=>onKeyPress('N')} /></div>
+              <div className="col-span-3"><Key labelArr={layout.M} onClick={()=>onKeyPress('M')} tone="convert" /></div>
+              <div className="col-span-3"><Key labelArr={["⌫"]} onClick={()=>backspace()} tone="dark" /></div>
               
             </Row21>
 
@@ -330,7 +331,7 @@ body { overscroll-behavior-y: none; }
             <Row21>
               <div className="col-span-4"><WideKey tone="dark" disabled>123</WideKey></div>
               <div className="col-span-12"><WideKey onClick={()=>space()}>Space</WideKey></div>
-              <div className="col-span-5"><WideKey tone="dark" onClick={()=>enter()}>⏎</WideKey></div>
+              <div className="col-span-4"><WideKey tone="dark" onClick={()=>enter()}>⏎</WideKey></div>
               
             </Row21>
 
