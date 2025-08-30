@@ -270,7 +270,6 @@
           <button onClick={disabled ? undefined : onClick} disabled={disabled}
             className={`${base} ${scheme} ${className||''}`} title={(hint?hint+" : ":"")+labelArr.join(' ')}>
             <span className={(labelArr[0] === "next") ? "text-[clamp(16px,2.8vw,26px)] font-semibold" : ""}>{display}</span>
-            {hint && <span className="absolute left-1 top-1 text-[11px] text-neutral-500 select-none">{hint}</span>}
           </button>
         );
       };
@@ -371,6 +370,42 @@
               <button onClick={clearInput} className="h-[48px] rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-[16px] font-medium">ንጽህና</button>
             </div>
           </div>
+          {/* TUTORIAL MODAL */}
+          {helpOpen && (
+            <div className="fixed inset-0 z-50">
+              <div className="absolute inset-0 bg-black/40" onClick={()=>setHelpOpen(false)}></div>
+              <div className="absolute inset-0 flex items-center justify-center p-4">
+                <div className="w-full max-w-[780px] max-h-[86vh] overflow-y-auto rounded-2xl bg-white border border-neutral-200 shadow-lg">
+                  <div className="flex items-center justify-between px-5 py-4 border-b">
+                    <div className="text-lg font-semibold">ረዳት</div>
+                    <button onClick={()=>setHelpOpen(false)} className="h-9 px-3 rounded-lg bg-neutral-900 text-white text-sm hover:bg-neutral-800">ውጣ</button>
+                  </div>
+                  <div className="p-5">
+  <section className="mb-6">
+    <h3 className="text-lg font-semibold mb-2">አቀማመጥ</h3>
+    <p className="mb-2">የድምፅ ቁልፎች፣ የቀጣይ ቁልፍ እና የወ ጥምረት ቁልፍ ቦታቸውን ያስታውሱ።</p>
+    <img src="img/help/keyboard.png" alt="Keyboard" className="border rounded" />
+  </section>
+  <section className="mb-6">
+    <h3 className="text-lg font-semibold mb-2">የተከታታይ ፊደሎች መጻፍ</h3>
+    <p className="mb-2">የፊደል ቡድን ቁልፍን ይጫኑ፣ ከዚያ ቀጣይ (≫) ሲጫኑ በዚያ ቁልፍ ያሉ ሌሎች ፊደሎች ይመራሉ።</p>
+    <img src="img/help/ex1.png" alt="Example 1" />
+  </section>
+  <section className="mb-6">
+    <h3 className="text-lg font-semibold mb-2">ድምፅ መቀየር</h3>
+    <p className="mb-2">ሥር ፊደልን ከጻፉ በኋላ የሚፈለገውን ድምፅ ቁልፍ ይጫኑ።</p>
+    <img src="img/help/ex2.png" alt="Example 2" />
+  </section>
+  <section>
+    <h3 className="text-lg font-semibold mb-2">የወ ቤተሰብ ፊደሎች መጻፍ</h3>
+    <p className="mb-2">ሥር ፊደልን ከጻፉ በኋላ የወ ቁልፍን እና ድምፅ ቁልፍን ተከታትለው ይጫኑ።</p>
+    <img src="img/help/ex3.png" alt="Example 3" />
+  </section>
+</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
