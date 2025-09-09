@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ተራናማ ሙከራ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+<script>
+const BASE_W = 1024, BASE_H = 579;
+const stage = document.getElementById('stage');
+function fit(){
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const s = Math.min(sw/BASE_W, sh/BASE_H, 1);
+  stage.style.transform = `scale(${s})`;
+}
+window.addEventListener('load', fit);
+window.addEventListener('resize', fit);
+</script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script>
+const BASE_W = 1024, BASE_H = 579;
+const stage = document.getElementById('stage');
+function fit(){
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const s = Math.min(sw/BASE_W, sh/BASE_H, 1);
+  stage.style.transform = `scale(${s})`;
+}
+window.addEventListener('load', fit);
+window.addEventListener('resize', fit);
+</script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script>
+const BASE_W = 1024, BASE_H = 579;
+const stage = document.getElementById('stage');
+function fit(){
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const s = Math.min(sw/BASE_W, sh/BASE_H, 1);
+  stage.style.transform = `scale(${s})`;
+}
+window.addEventListener('load', fit);
+window.addEventListener('resize', fit);
+</script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script>
+const BASE_W = 1024, BASE_H = 579;
+const stage = document.getElementById('stage');
+function fit(){
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const s = Math.min(sw/BASE_W, sh/BASE_H, 1);
+  stage.style.transform = `scale(${s})`;
+}
+window.addEventListener('load', fit);
+window.addEventListener('resize', fit);
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; padding:0; font-family:'Noto Sans Ethiopic',sans-serif; }
+    #fitwrap{
+  height:100vh; display:flex; align-items:flex-start; justify-content:center;
+  overflow:hidden;
+}
+#stage{
+  position:relative;
+  width:1024px; height:579px;   /* 기준 해상도 고정 */
+  transform-origin: top left;
+}
+#bgwrap{
+  position:relative;
+  width:100%; height:100%;
+  background:url('img/pcdemo.png') no-repeat center top / 100% 100%;
+}
+    .overlay { position:absolute; }
+    #output {
+      width:55%; left:15%;
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 12px 14px;
+      border: 1px solid #bbb;
+      border-radius: 10px;
+      background: #fff;
+      resize: none;
+      ime-mode: disabled;
+    }
+    .btn {
+      min-width:180px; height:44px;
+      border-radius:22px; border:none;
+      font-size:16px; font-weight:600;
+      cursor:pointer; margin:0 8px;
+    }
+    .btn-yellow { background:#facc15; }
+    .btn-dark { background:#333; color:#fff; }
+    .btn-sky { background:#38bdf8; }
+    #closebtn {
+      top:48px; right:113px;
+      width:28px; height:28px;
+      background:#e11d48; color:#fff;
+      border:none; border-radius:6px;
+      font-weight:bold; cursor:pointer;
+    }
+  
+    /* Placeholder in red inside the textarea */
+    #output.placeholder { color: red; }
+	
+	    /* 눌림 효과 */
+    .flash {
+      position:absolute;
+      width:44px; height:auto;         /* 키 크기 대략 */
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+<button onclick="location.href='index.html'" 
+        style="position: fixed; top: 20px; right: 78px; 
+               padding: 10px 18px; font-size: 1.1em; 
+               background-color: #3f6fb8; color: #fff; 
+               border: none; border-radius: 8px; cursor: pointer; 
+               box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+               z-index: 9999;">
+  Home
+</button>
+<div id="fitwrap">
+  <div id="stage">
+<div id="bgwrap">
+  <button id="closebtn" class="overlay">X</button>
+<!-- 우상단 두더지 아이콘 밑에 링크 추가 -->
+<a href="whackamole.html" target="_blank"
+   class="overlay"
+   style="top:70px; right:130px; display:flex; flex-direction:column; align-items:center;
+          text-decoration:none; color:#000; font-weight:bold; font-size:16px;
+          z-index:1000;">   <!-- 추가 -->
+  <img src="img/icon_mole.png" alt="두더지 아이콘" style="width:60px; height:auto; margin-top:30px; margin-bottom:4px;">
+  የቡችላ ጨዋታ
+</a>
+
+
+
+  <div class="overlay" style="top:110px; left:7%; width:70%; text-align:center; font-size:16px; font-weight:500;">
+    የፒሲ ኪቦርድን ከመጠቀም በኩል ከታች ያለውን የኪቦርድ እርዳታ ብቻ ተመልከቱ እና ያስገቡ።
+<br>የእጅ ጣቶችን ቁልፍ ማግኘት ከቸገራችሁ ከመጀመሪያ የቡችላ ጨዋታውን ይሞክሩ።
+  </div>
+<div class="overlay" 
+     style="top:200px; left:41%; width:70%; text-align:center;
+            font-size:18px; font-weight:bold; color:#000;">
+  የግቤት መንገድ
+</div>
+  <div class="overlay" 
+     style="bottom:30px; left:-20%; width:70%; text-align:center;
+            font-size:16px; font-weight:500; color:#fff;">
+  
+</div>
+
+  <textarea id="output" class="overlay" style="top:188px; left:14%; height:220px;"></textarea>
+  <div class="overlay" style="bottom:160px; left:50%; transform:translateX(-50%); display:flex; gap:20px;">
+    
+
+</div>
+
+<script>
+
+/* ========================
+   TERANAMA PC INPUT ENGINE — textarea only
+   - next(≫) keeps vowel order, wa handled
+   - IME hard-block (readOnly + inputmode=none + composition prevention)
+   ======================== */
+const out = document.getElementById('output');
+
+// === Placeholder setup (Amharic notice in red) ===
+const placeholderText = "እባኮትን በመጻፍዎ በፊት የእንግሊዝኛ የጽሑፍ ሁኔታን ይምረጡ።";
+
+function setPlaceholder(){
+  out.value = placeholderText;
+  out.classList.add("placeholder");
+}
+function clearPlaceholder(){
+  if(out.classList.contains("placeholder")){
+    out.value = "";
+    out.classList.remove("placeholder");
+  }
+}
+// initialize placeholder on load
+window.addEventListener('load', () => { setPlaceholder(); }, { once:true });
+// clear placeholder on focus
+out.addEventListener('focus', () => { clearPlaceholder(); });
+// clear placeholder on first typing
+document.addEventListener('keydown', () => { clearPlaceholder(); }, { once:true });
+
+// Keep focus off the textarea to avoid OS IME
+window.addEventListener('load', () => { document.body.focus(); });
+out.addEventListener('focus', (e) => { e.preventDefault(); document.body.focus(); });
+
+// Ethiopic helpers
+const getSeriesBase = (cp) => cp - (cp % 8);
+const isEthiopic = (cp) => (cp >= 0x1024 && cp <= 0x137F);
+
+// Ge'ez order mapping 0..6 (ä,u,i,a,e,ə,o)
+const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6 }; // K 별도 처리
+
+// w-series base map (대표 4계열). 미존재 시 +7 폴백.
+const wSeriesBaseMap = new Map(Object.entries({
+  "ቀ":"ቈ", "ከ":"ኰ", "ገ":"ጐ", "ኸ":"ዀ", "ኀ":"ኈ"
+}));
+const wBaseSet = new Set([...wSeriesBaseMap.values()]);
+
+// Base groups for 'next' cycling
+const layout = {
+  Q: ["ገ"], W: ["ወ"], E: ["የ"], R: ["አ","ጸ","ጰ"], T: ["ቀ","ዐ","ፀ"], Y: ["ዘ","ዠ"],
+  A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ","ኀ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
+  Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ"],
+  M: ["next"]
+};
+const baseToGroup = new Map();
+for (const arr of Object.values(layout)) {
+  if (arr[0] === "next") continue;
+  if (arr.length < 2) continue;
+  for (const ch of arr) baseToGroup.set(ch, arr);
+}
+
+// text helpers
+const getText = () => out.classList.contains('placeholder') ? '' : out.value;
+const setText = (s) => { if(!s){ setPlaceholder(); } else { out.value = s; out.classList.remove('placeholder'); } };
+const insert = (t) => setText(getText() + t);
+const backspace = () => setText(getText().slice(0, -1));
+const newline = () => insert("\\n");
+const space   = () => insert(" ");
+
+// Base insert mapping
+const keyToBaseInsert = {
+  Q:"ገ", W:"ወ", E:"የ", R:"አ", T:"ቀ", Y:"ዘ",
+  A:"ተ", S:"ረ", D:"ነ", F:"መ", G:"ከ", H:"ጠ",
+  Z:"ደ", X:"ሰ", C:"ለ", V:"በ", B:"ሀ", N:"ቸ"
+};
+
+// Vowel apply
+function applyVowelIndex(orderIndex) {
+  const prev = getText(); if (!prev) return;
+  const chars = Array.from(prev);
+  const last = chars[chars.length - 1];
+  const cp = last.codePointAt(0); if (!isEthiopic(cp)) return;
+  const base = getSeriesBase(cp);
+  const newCp = base + orderIndex;
+  try { chars[chars.length - 1] = String.fromCodePoint(newCp); setText(chars.join("")); } catch {}
+}
+
+// K key: ə then w-series
+function onKPress() {
+  const prev = getText();
+  if (!prev) { insert("እ"); return; }
+  const chars = Array.from(prev);
+  const i = chars.length - 1;
+  const cp = chars[i].codePointAt(0);
+  if (!isEthiopic(cp)) { insert("እ"); return; }
+
+  let base = getSeriesBase(cp);
+  let order = cp - base;
+  let baseChar = String.fromCodePoint(base);
+
+  // ★ 이미 w-시리즈면: K → 0형(베이스)
+  if (wBaseSet.has(baseChar) || order === 7) {
+    const wBaseChar = wBaseSet.has(baseChar) ? baseChar : wSeriesBaseMap.get(baseChar);
+    if (wBaseChar) {
+      chars[i] = wBaseChar;  // 0형으로 교체
+      setText(chars.join(""));
+      return;
+    }
+  }
+
+  // 아직 w-시리즈 아님
+  if (order !== 5) {
+    // 첫 K → ə(5형)
+    chars[i] = String.fromCodePoint(base + 5);
+  } else {
+    // 두 번째 K → w-시리즈 진입
+    const wBaseChar = wSeriesBaseMap.get(baseChar);
+    chars[i] = wBaseChar ? wBaseChar : String.fromCodePoint(base + 7);
+  }
+  setText(chars.join(""));
+}
+
+
+// Standalone vowels when no target
+const standaloneByKey = { U:"ኡ", I:"ኢ", O:"ኦ", J:"ኣ", L:"ኤ" };
+function onVowelKey(k) {
+  let orderIndex = VOWEL_INDEX[k];
+  const prev = getText();
+  if (!prev) { insert(standaloneByKey[k] || ""); return; }
+
+  const chars = Array.from(prev);
+  const last  = chars[chars.length - 1];
+  const cp    = last.codePointAt(0);
+  if (!isEthiopic(cp)) { insert(standaloneByKey[k] || ""); return; }
+
+  let base = getSeriesBase(cp);
+  let baseChar = String.fromCodePoint(base);
+
+  // (가짜) +7에서 들어온 경우엔 진짜 w-베이스로 전환
+  const order = cp - base; // 0..7
+  if (order === 7) {
+    const wBaseChar = wSeriesBaseMap.get(baseChar);
+    if (wBaseChar) { baseChar = wBaseChar; base = wBaseChar.codePointAt(0); }
+  }
+
+  // ★ w-시리즈에서는 'O'를 5로 보정 → …o가 base+5
+  const inWSeries = (order === 7) || wBaseSet.has(baseChar);
+  if (inWSeries && k === 'O') orderIndex = 5;
+
+  const newCp = base + orderIndex;
+  chars[chars.length - 1] = String.fromCodePoint(newCp);
+  setText(chars.join(""));
+}
+
+
+// Next (≫): keep vowel order; wa stays wa
+function nextTransform() {
+  const prev = getText(); if (!prev) return;
+  const chars = Array.from(prev);
+  const last = chars[chars.length - 1];
+  const cp = last.codePointAt(0); if (!isEthiopic(cp)) return;
+
+  const base = getSeriesBase(cp);
+  const order = cp - base; // 0..7
+
+  const baseChar = String.fromCodePoint(base);
+  const group = baseToGroup.get(baseChar);
+  if (!group || group.length < 2) return;
+
+  const idx = group.indexOf(baseChar);
+  const nextBaseChar = group[(idx + 1) % group.length];
+  const nextBase = nextBaseChar.codePointAt(0);
+
+  let newChar;
+  if (order === 7) {
+    const wBase = wSeriesBaseMap.get(nextBaseChar);
+    newChar = wBase ? wBase : String.fromCodePoint(nextBase + 7);
+  } else {
+    newChar = String.fromCodePoint(nextBase + order);
+  }
+  chars[chars.length - 1] = newChar;
+  setText(chars.join(""));
+}
+
+// Hardware mapping
+const codeToKey = {
+  KeyQ:'Q', KeyW:'W', KeyE:'E', KeyR:'R', KeyT:'T', KeyY:'Y',
+  KeyU:'U', KeyI:'I', KeyO:'O',
+  KeyA:'A', KeyS:'S', KeyD:'D', KeyF:'F', KeyG:'G', KeyH:'H',
+  KeyJ:'J', KeyK:'K', KeyL:'L',
+  KeyZ:'Z', KeyX:'X', KeyC:'C', KeyV:'V', KeyB:'B', KeyN:'N', KeyM:'M'
+};
+
+function onKeyPressLetter(k) {
+  if (k === 'M') { nextTransform(); return; }
+  if (k === 'K') { onKPress(); return; }
+  if (k === 'U' || k === 'I' || k === 'J' || k === 'L' || k === 'O') { onVowelKey(k); return; }
+  const base = keyToBaseInsert[k];
+  if (!base) return;
+  insert(base);
+}
+
+// Global keydown interception
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const code = e.code;
+  if (codeToKey[code]) { e.preventDefault(); e.stopPropagation(); onKeyPressLetter(codeToKey[code]); return; }
+  if (code === 'Space') { e.preventDefault(); e.stopPropagation(); space(); return; }
+  if (code === 'Enter') { e.preventDefault(); e.stopPropagation(); newline(); return; }
+  if (code === 'Backspace') { e.preventDefault(); e.stopPropagation(); backspace(); return; }
+}, true);
+
+// Block composition & input on textarea
+['beforeinput','input','compositionstart','compositionupdate','compositionend'].forEach(type => {
+  out.addEventListener(type, (e) => { e.preventDefault(); e.stopPropagation(); return false; }, true);
+});
+
+</script>
+<script>
+const BASE_W = 1024, BASE_H = 720;
+const stage = document.getElementById('stage');
+function fit(){
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const s = Math.min(sw/BASE_W, sh/BASE_H, 1);
+  stage.style.transform = `scale(${s})`;
+}
+window.addEventListener('load', fit);
+window.addEventListener('resize', fit);
+</script>
+<script>
+/* ======= 눌림 효과 구현 ======= */
+const kb = document.getElementById('bgwrap');
+const keyPos = {
+  // 1행
+  KeyQ:{x:309,y:479}, KeyW:{x:356,y:479}, KeyE:{x:403,y:479}, KeyR:{x:450,y:479},
+  KeyT:{x:496,y:479}, KeyY:{x:563,y:479}, KeyU:{x:610,y:479}, KeyI:{x:656,y:479}, KeyO:{x:703,y:479},
+  // 2행
+  KeyA:{x:320,y:517}, KeyS:{x:367,y:517}, KeyD:{x:413,y:517}, KeyF:{x:460,y:517},
+  KeyG:{x:506,y:517}, KeyH:{x:573,y:517}, KeyJ:{x:620,y:517}, KeyK:{x:667,y:517}, KeyL:{x:713,y:517},
+  // 3행
+  KeyZ:{x:345,y:554}, KeyX:{x:392,y:554}, KeyC:{x:439,y:554}, KeyV:{x:486,y:554},
+  KeyB:{x:532,y:554}, KeyN:{x:599,y:554}, KeyM:{x:646,y:554},
+};
+
+function flashAt(x,y){
+  const el = document.createElement('img');
+  el.src = 'img/pressed.png';
+  el.className = 'flash';
+  el.style.left = x+'px';
+  el.style.top  = y+'px';
+  kb.appendChild(el);
+  setTimeout(()=>el.remove(), 160);
+}
+
+window.addEventListener('keydown', e=>{
+  const code = (e.code === 'Space') ? 'Space' : e.code;
+  const pos = keyPos[code];
+  if(!pos) return;
+  flashAt(pos.x, pos.y);
+}, true);
+</script>
+</body>
+</html>

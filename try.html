@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>ተራናማ ግብዓት ሙከራ</title>
+  <style>
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #222;
+    }
+    h1 {
+      font-size: 3em;
+	  margin-top: 30px;
+	  margin-left: 80px;
+      margin-bottom: 20px;
+    }
+    .container {
+      display: flex;
+      align-items: flex-start;
+      gap: 40px;
+    }
+    .text {
+      flex: 1;
+      line-height: 1.7;
+	  margin-left: 80px;
+      font-size: 1.3em;
+    }
+    .illustration {
+      flex: 1;
+    }
+    .illustration img {
+		width: 100%;
+		max-width: 500px;
+		border-radius: 6px;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+		margin-top: 24px;  /* 원하는 만큼 내려줌 */
+		margin-left: 15px
+}
+    .buttons {
+      margin-top: 60px;
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+	  width: 320px;   /* 원하는 고정값으로 */
+	  justify-content: center;
+      gap: 10px;
+      padding: 18px 28px;
+      font-size: 1.6em;
+      font-weight: 600;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+    }
+    .btn img {
+      height: 36px;
+    }
+    .btn-green {
+      background: #6cbc43;
+    }
+    .btn-blue {
+      background: #3f6fb8;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+<button onclick="location.href='index.html'" 
+        style="position: fixed; top: 20px; right: 78px; 
+               padding: 10px 18px; font-size: 1.1em; 
+               background-color: #3f6fb8; color: #fff; 
+               border: none; border-radius: 8px; cursor: pointer; 
+               box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+               z-index: 9999;">
+  Home
+</button>
+
+
+
+  <h1>ተራናማ ግብዓት ሙከራ</h1>
+  <div class="container">
+    <div class="text">
+      <p>ሙከራን ስለመረጡ እናመሰግናለን።</p>
+      <p>
+        ተራናማ እስከሚተለመድ ድረስ የቁልፍ ካርታውን በመመልከት የሚጠቀሙበት የኪቦርድ ነው።<br>
+        በዚህ ጊዜ ኪቦርዱን ወደታች ማየት አያስፈልግም። የቁልፍ ካርታውን ብቻ በመመልከት ትክክለኛ መጻፍ ትችላለህ።
+      </p>
+      <p>
+        ከባድ ነው ብዬ ትመስላለህ? አትጨነቅ። ከታች ያለውን የአሳሳቢ ጨዋታ በ5 ደቂቃ ብቻ ካደረጉ በኋላ እርስዎም በመመልከት ብቻ መጻፍ ትችላለህ።
+      </p>
+    </div>
+    <div class="illustration">
+      <img src="img/trypc.png" alt="테라나마 체험 삽화">
+    </div>
+  </div>
+  <div class="buttons">
+  <!-- 두더지 게임 버튼 -->
+  <button class="btn btn-green" onclick="location.href='mole.html'">
+    <img src="img/icon_mole.png" alt="두더지 게임 아이콘">
+    የተንኮል ጨዋታ ጀምር
+  </button>
+
+  <!-- 테라나마 체험 버튼 -->
+  <button class="btn btn-blue" onclick="location.href='teranama.html'">
+    <img src="img/icon_keyboard.png" alt="키보드 아이콘">
+    በቀጥታ ሙከራ<br>(እንደገና መግቢያ)
+  </button>
+</div>
+
+</body>
+</html>

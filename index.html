@@ -1,417 +1,135 @@
 <!doctype html>
-<html lang="ko">
+<html lang="am">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Teranama Trial (9-col)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>teranama — HERO precise</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Noto Sans Ethiopic', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif; }
-    #app { min-height: 100dvh; }
-    .keycap { white-space: nowrap; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/hero.css">
 </head>
-<body class="bg-[#FAFAFA] text-neutral-900">
-  <div id="app"></div>
-
-  <script type="text/babel">
-    const { useMemo, useRef, useState, useEffect } = React;
-
-    // === Google Form + Google Sheets integration (same endpoints as before, replace if needed) ===
-    const FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSegYw7XM53KU9KK0FwDnqIgnau2zYitQf8fOBS-EzhIYG4fMQ/formResponse";
-    const ENTRY_FIELD = "entry.778639205";
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSPtkTh91pKg80xKGC_r6d4yrHI0_t5KcguuTYHUCu80BYtPEb8D-h3vyI00O_pi3NVwDw1d6mHJmNw/pub?output=csv";
-
-    function postToGoogleForm(text) {
-      if (!text || !text.trim()) return;
-      const body = new URLSearchParams({ [ENTRY_FIELD]: text.trim() });
-      fetch(FORM_ACTION, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body
-      }).catch(()=>{});
-    }
-    async function fetchSheetCSV(url) {
-      try {
-        const res = await fetch(url, { cache: "no-store" });
-        const text = await res.text();
-        const lines = text.split(/\\r?\\n/).filter(Boolean);
-        const rows = lines.slice(1).map(line => {
-          const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
-          let cell = cols[cols.length - 1] || "";
-          cell = cell.replace(/^"(.*)"$/s, "$1").replace(/""/g, '"');
-          return cell.trim();
-        }).filter(Boolean);
-        return rows.reverse();
-      } catch (e) { return []; }
-    }
-
-    function RatanamaPlayground() {
-      const [posts, setPosts] = useState([]);
-      const [inputText, setInputText] = useState("");
-      const [helpOpen, setHelpOpen] = useState(false);
-      const listRef = useRef(null);
-      const inputRef = useRef(null);
-      const kStandalone = useRef(0);
-
-      // ===== Layout (9 columns) =====
-      const layout = useMemo(() => ({
-        Q: ["ገ"], W: ["ወ"], E: ["የ"], R: ["አ","ጸ","ጰ"], T: ["ቀ","ዐ","ፀ"], Y: ["ዘ","ዠ"],
-        U: ["ኡ"], I: ["ኢ"], O: ["ኦ"],
-        A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ","ኀ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
-        J: ["ኣ"],       // vowel 'a'
-        K: ["እ","ዉ"],  // vowel 'ə' + ዉ multitap
-        L: ["ኤ"],       // vowel 'e'
-        Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ"],
-        M: ["next"],
-      }), []);
-
-      // Use real thin-space character (fix for unicode escapes showing)
-      const THIN_SPACE = " "; // U+2009
-
-      // Vowel order map (Ge'ez order: 0=ä,1=u,2=i,3=a,4=e,5=ə,6=o)
-      const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6 }; // K handled separately (ə then w-series)
-
-      // For w-series special bases
-      const wSeriesBaseMap = new Map(Object.entries({
-        "ቀ":"ቈ", "ከ":"ኰ", "ገ":"ጐ", "ኸ":"ዀ"
-      }));
-
-      // Group map for next(≫)
-      const charToGroup = useMemo(() => {
-        const map = new Map();
-        Object.values(layout).forEach(arr => {
-          if (arr[0] === "next") return;
-          // Only register groups that actually have alternatives (>=2)
-          if (arr.length < 2) return;
-          arr.forEach(ch => {
-            const prev = map.get(ch);
-            if (!prev || prev.length < arr.length) map.set(ch, arr);
-          });
-        });
-        return map;
-      }, [layout]);
-
-      const focusAtEnd = () => {
-        requestAnimationFrame(() => {
-          const el = inputRef.current;
-          if (!el) return;
-          el.focus();
-          const len = el.value.length;
-          try { el.setSelectionRange(len, len); } catch {}
-        });
-      };
-
-      const insertText = (t) => { setInputText(prev => prev + t); focusAtEnd(); };
-      const backspace = () => { setInputText(prev => prev.slice(0, -1)); focusAtEnd(); };
-      const enter = () => insertText("\\n");
-      const space = () => insertText(" ");
-
-      const getSeriesBase = (cp) => cp - (cp % 8);
-      const isEthiopic = (cp) => (cp >= 0x1200 && cp <= 0x137F);
-
-      // ===== Vowel application logic =====
-      const applyVowelIndex = (orderIndex) => {
-        setInputText(prev => {
-          if (!prev) return prev;
-          const chars = Array.from(prev);
-          const last = chars[chars.length - 1];
-          const cp = last.codePointAt(0);
-          if (!isEthiopic(cp)) return prev;
-          const base = getSeriesBase(cp);
-          const newCp = base + orderIndex;
-          try {
-            chars[chars.length - 1] = String.fromCodePoint(newCp);
-            return chars.join("");
-          } catch { return prev; }
-        });
-        focusAtEnd();
-      };
-
-      // Standalone letters used when no target exists
-      const standaloneByKey = {
-        U: "ኡ", I: "ኢ", O: "ኦ",
-        J: "ኣ", L: "ኤ"
-        // K handled separately to support multi-tap እ/ዉ
-      };
-
-      // K key multi-tap cycle when no target
-      let kCycleIndex = 0;
-      const cycleK = () => {
-        const choices = layout.K;
-        kCycleIndex = (kCycleIndex + 1) % choices.length;
-        return choices[kCycleIndex];
-      };
-
-      const onVowelKeyPress = (k) => {
-        const orderIndex = VOWEL_INDEX[k];
-        setInputText(prev => {
-          if (!prev) {
-            if (k === "K") return layout.K[0]; // start from እ
-            return (standaloneByKey[k] || "") || prev;
-          }
-          const chars = Array.from(prev);
-          const last = chars[chars.length - 1];
-          const cp = last.codePointAt(0);
-          if (isEthiopic(cp)) {
-            const base = getSeriesBase(cp);
-            const newCp = base + orderIndex;
-            try {
-              chars[chars.length - 1] = String.fromCodePoint(newCp);
-              return chars.join("");
-            } catch { return prev; }
-          }
-          if (k === "K") return prev + cycleK();
-          return prev + (standaloneByKey[k] || "");
-        });
-        focusAtEnd();
-      };
-      // Special handling for K (ə then w-series default)
-      const onKPress = () => {
-        setInputText(prev => {
-          // No previous text -> standalone toggle እ <-> ዉ
-          if (!prev) {
-            kStandalone.current = (kStandalone.current + 1) % 2;
-            return (kStandalone.current === 0) ? "እ" : "ዉ";
-          }
-          const chars = Array.from(prev);
-          const last = chars[chars.length - 1];
-          const cp = last.codePointAt(0);
-          const isEth = (cp >= 0x1200 && cp <= 0x137F);
-          if (!isEth) {
-            // Not Ethiopic target -> standalone toggle
-            kStandalone.current = (kStandalone.current + 1) % 2;
-            return prev + ((kStandalone.current === 0) ? "እ" : "ዉ");
-          }
-          const base = getSeriesBase(cp);
-          const order = cp - base;
-          if (order !== 5) {
-            // First press: apply ə (order 5)
-            const newCp = base + 5;
-            try {
-              chars[chars.length - 1] = String.fromCodePoint(newCp);
-              return chars.join("");
-            } catch { return prev; }
-          } else {
-            // Second press: convert to w-series default
-            const baseChar = String.fromCodePoint(base);
-            const wBaseChar = wSeriesBaseMap.get(baseChar);
-            const newCp = wBaseChar ? wBaseChar.codePointAt(0) : (base + 7);
-            try {
-              chars[chars.length - 1] = String.fromCodePoint(newCp);
-              return chars.join("");
-            } catch { return prev; }
-          }
-        });
-        focusAtEnd();
-      };
-
-
-      const nextTransform = () => {
-        setInputText(prev => {
-          if (!prev) return prev;
-          const arr = Array.from(prev);
-          const last = arr[arr.length - 1];
-          const group = charToGroup.get(last);
-          if (!group || group.length < 2) return prev;
-          const idx = group.indexOf(last);
-          const next = group[(idx + 1) % group.length];
-          arr[arr.length - 1] = next;
-          return arr.join("");
-        });
-        focusAtEnd();
-      };
-
-      const onKeyPress = (k) => {
-        if (k === "M") return nextTransform();
-        if (k === "K") return onKPress();
-        if (VOWEL_INDEX[k] !== undefined) return onVowelKeyPress(k);
-        const arr = layout[k];
-        if (!arr || arr[0] === "next") return;
-        insertText(arr[0]);
-      };
-
-      // Load posts
-      useEffect(() => {
-        (async () => {
-          const rows = await fetchSheetCSV(SHEET_CSV_URL);
-          if (rows.length) setPosts(rows);
-        })();
-      }, []);
-
-      const savePost = () => {
-        const trimmed = inputText.trim();
-        if (!trimmed) return;
-        setPosts(prev => [trimmed, ...prev]);
-        try { postToGoogleForm(trimmed); } catch(e) {}
-        setInputText("");
-        requestAnimationFrame(() => listRef.current?.scrollTo({ top: 0, behavior: 'smooth' }));
-        focusAtEnd();
-      };
-      const clearInput = () => { setInputText(""); focusAtEnd(); };
-
-      // ===== UI Components =====
-      const Key = ({ labelArr, onClick, disabled, className, tone, hint }) => {
-        const display = labelArr[0] === "next" ? "≫" : labelArr.join(THIN_SPACE);
-        const base = 'keycap w-full select-none text-[clamp(14px,2.4vw,22px)] leading-tight flex items-center justify-center h-[56px] md:h-[60px] rounded-none border active:translate-y-[1px]';
-        let scheme = 'bg-white border-neutral-200 hover:bg-neutral-50';
-        if (tone === 'vowel') scheme = 'bg-sky-100 border-sky-200 hover:bg-sky-50';
-        if (tone === 'convert') scheme = 'bg-orange-100 border-orange-200 hover:bg-orange-50';
-        if (tone === 'dark') scheme = 'bg-neutral-300 border-neutral-400 text-neutral-900 hover:bg-neutral-200';
-        if (disabled && tone !== 'dark') scheme = 'bg-neutral-200 text-neutral-400 border-neutral-200';
-        return (
-          <button onClick={disabled ? undefined : onClick} disabled={disabled}
-            className={`${base} ${scheme} ${className||''}`} title={(hint?hint+" : ":"")+labelArr.join(' ')}>
-            <span className={(labelArr[0] === "next") ? "text-[clamp(16px,2.8vw,26px)] font-semibold" : ""}>{display}</span>
-          </button>
-        );
-      };
-
-      const WideKey = ({ children, onClick, disabled, className, tone }) => {
-        let scheme = 'bg-white hover:bg-neutral-50 border-neutral-200';
-        if (tone === 'dark') scheme = 'bg-neutral-300 border-neutral-400 text-neutral-900 hover:bg-neutral-200';
-        if (disabled && tone !== 'dark') scheme = 'bg-neutral-200 text-neutral-400 border-neutral-200';
-        return (
-          <button onClick={disabled ? undefined : onClick} disabled={disabled}
-            className={`w-full h-[56px] md:h-[60px] border rounded-none text-[16px] md:text-[18px] ${scheme} ${className||''}`}>
-            {children}
-          </button>
-        );
-      };
-
-      // Row helpers (18-unit grid for all three rows)
-      const Row18 = ({ children }) => (
-        <div className="grid gap-0 w-full" style={{ gridTemplateColumns: 'repeat(18, minmax(0, 1fr))' }}>{children}</div>
-      );
-
-      return (
-        <div className="min-h-screen w-full flex flex-col">
-          {/* header */}
-          <div className="flex items-center justify-between px-4 py-3">
-            <h1 className="text-xl md:text-2xl font-semibold">ላታናማ የቁልፍ ሙከራ ገጽ</h1>
-            <div className="flex items-center gap-3">
-              <button onClick={()=>setHelpOpen(true)} className="h-9 px-3 rounded-lg bg-neutral-900 text-white text-sm hover:bg-neutral-800">ረዳት</button>
-            </div>
-          </div>
-
-          {/* posts */}
-          <div ref={listRef} className="mx-4 mb-2 rounded-xl bg-white border border-neutral-200 p-3 h-[260px] md:h-[320px] overflow-y-auto">
-            {posts.map((p,i) => (
-              <div key={i} className="mb-3">
-                <div className="whitespace-pre-wrap text-[15px] md:text-[16px] leading-6">{p}</div>
-                <div className="h-px bg-neutral-100 mt-2" />
-              </div>
-            ))}
-            {posts.length===0 && (<div className="text-neutral-400">아직 게시된 글이 없습니다. 첫 글을 남겨보세요.</div>)}
-          </div>
-
-          {/* input */}
-          <div className="mx-4 mb-2">
-            <textarea ref={inputRef} value={inputText} onChange={e=>setInputText(e.target.value)} placeholder="እዚህ ጻፉ…" className="w-full h-[88px] md:h-[96px] resize-none rounded-xl border border-neutral-300 bg-white p-3 text-[16px] md:text-[18px] leading-6 focus:outline-none focus:ring-2 focus:ring-amber-300" />
-          </div>
-
-          {/* keyboard */}
-          <div className="mt-0">
-            {/* Row 1: 9 columns => 18 units */}
-            <Row18>
-              <div className="col-span-2"><Key labelArr={layout.Q} onClick={()=>onKeyPress('Q')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.W} onClick={()=>onKeyPress('W')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.E} onClick={()=>onKeyPress('E')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.R} onClick={()=>onKeyPress('R')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.T} onClick={()=>onKeyPress('T')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.Y} onClick={()=>onKeyPress('Y')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.U} onClick={()=>onKeyPress('U')} tone="vowel" hint="U" /></div>
-              <div className="col-span-2"><Key labelArr={layout.I} onClick={()=>onKeyPress('I')} tone="vowel" hint="I" /></div>
-              <div className="col-span-2"><Key labelArr={layout.O} onClick={()=>onKeyPress('O')} tone="vowel" hint="O" /></div>
-            </Row18>
-
-            {/* Row 2: 9 columns => 18 units */}
-            <Row18>
-              <div className="col-span-2"><Key labelArr={layout.A} onClick={()=>onKeyPress('A')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.S} onClick={()=>onKeyPress('S')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.D} onClick={()=>onKeyPress('D')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.F} onClick={()=>onKeyPress('F')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.G} onClick={()=>onKeyPress('G')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.H} onClick={()=>onKeyPress('H')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.J} onClick={()=>onKeyPress('J')} tone="vowel" hint="J (a)" /></div>
-              <div className="col-span-2"><Key labelArr={layout.K} onClick={()=>onKeyPress('K')} tone="vowel" hint="K (ə / ዉ multi)" /></div>
-              <div className="col-span-2"><Key labelArr={layout.L} onClick={()=>onKeyPress('L')} tone="vowel" hint="L (e)" /></div>
-            </Row18>
-
-            {/* Row 3: same 18-unit grid; next/delete are 1.5x (3 units) */}
-            <Row18>
-              <div className="col-span-2"><Key labelArr={layout.Z} onClick={()=>onKeyPress('Z')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.X} onClick={()=>onKeyPress('X')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.C} onClick={()=>onKeyPress('C')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.V} onClick={()=>onKeyPress('V')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.B} onClick={()=>onKeyPress('B')} /></div>
-              <div className="col-span-2"><Key labelArr={layout.N} onClick={()=>onKeyPress('N')} /></div>
-              <div className="col-span-3"><Key labelArr={layout.M} onClick={()=>onKeyPress('M')} tone="convert" /></div>  {/* next: 1.5 */}
-              <div className="col-span-3"><Key labelArr={["⌫"]} onClick={()=>backspace()} tone="dark" /></div>  {/* delete: 1.5 */}
-            </Row18>
-
-            {/* Bottom row: 123(2) | Space(5) | Enter(2) in 9-key scale => 18 units */}
-            <Row18>
-              <div className="col-span-4"><WideKey tone="dark" disabled>123</WideKey></div>
-              <div className="col-span-10"><WideKey onClick={()=>space()}>Space</WideKey></div>
-              <div className="col-span-4"><WideKey tone="dark" onClick={()=>enter()}>⏎</WideKey></div>
-            </Row18>
-
-            {/* actions */}
-            <div className="grid grid-cols-2 gap-3 px-4 py-3 bg-[#FAFAFA]">
-              <button onClick={savePost} className="h-[48px] rounded-xl bg-amber-400 hover:bg-amber-300 border border-amber-300 text-neutral-900 text-[16px] font-semibold">ግልጽ</button>
-              <button onClick={clearInput} className="h-[48px] rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-[16px] font-medium">ንጽህና</button>
-            </div>
-          </div>
-          {/* TUTORIAL MODAL */}
-          {helpOpen && (
-            <div className="fixed inset-0 z-50">
-              <div className="absolute inset-0 bg-black/40" onClick={()=>setHelpOpen(false)}></div>
-              <div className="absolute inset-0 flex items-center justify-center p-4">
-                <div className="w-full max-w-[780px] max-h-[86vh] overflow-y-auto rounded-2xl bg-white border border-neutral-200 shadow-lg">
-                  <div className="flex items-center justify-between px-5 py-4 border-b">
-                    <div className="text-lg font-semibold">ረዳት</div>
-                    <button onClick={()=>setHelpOpen(false)} className="h-9 px-3 rounded-lg bg-neutral-900 text-white text-sm hover:bg-neutral-800">ውጣ</button>
-                  </div>
-                  <div className="p-5">
-  <section className="mb-6">
-    <h3 className="text-lg font-semibold mb-2">አቀማመጥ</h3>
-    <p className="mb-2">የድምፅ ቁልፎች፣ የቀጣይ ቁልፍ እና የወ ጥምረት ቁልፍ ቦታቸውን ያስታውሱ።</p>
-    <img src="img/help/keyboard.png" alt="Keyboard" className="border rounded" />
+<body>
+  <section class="hero">
+    <img class="bg" src="img/hero_keyboard.png" alt="keyboard">
+    <img class="logo" src="img/logo.png" alt="teranama">
+    <div class="copy-block">
+    <!--  <img class="bubble" src="img/bubble.png" alt=""> -->
+      <h1 class="copy">ዲጂታል አማርኛ አሁን ደህና ነው?</h1>
+	  <p class="hero-subtitle">አዲስ ለውጥ ከኪቦርድ...</p>
+    </div>
   </section>
-  <section className="mb-6">
-    <h3 className="text-lg font-semibold mb-2">የተከታታይ ፊደሎች መጻፍ</h3>
-    <p className="mb-2">የፊደል ቡድን ቁልፍን ይጫኑ፣ ከዚያ ቀጣይ (≫) ሲጫኑ በዚያ ቁልፍ ያሉ ሌሎች ፊደሎች ይመራሉ።</p>
-    <img src="img/help/ex1.png" alt="Example 1" />
+
+  <!-- Section #2: ለምን ቀላል ነው ? -->
+  <section class="sec why">
+    <div class="wrap">
+      <h2 class="why-title">ለምን ተራናማ?</h2>
+      <div class="why-grid">
+        <figure class="why-item" style="--img-w:88%; --cap-gap:2px;">
+          <img src="img/keycap.png" alt="keycap">
+          <figcaption class="why-cap">ቀላል ቅደም ተከተል</figcaption>
+        </figure>
+        <figure class="why-item" style="--img-w:88%; --cap-gap:2px;">
+          <img src="img/useless.png" alt="hammer">
+          <figcaption class="why-cap">ቀላል መጻፍ</figcaption>
+        </figure>
+        <figure class="why-item" style="--img-w:88%; --cap-gap:2px;">
+          <img src="img/keyboardwalker.png" alt="keyboard walker">
+          <figcaption class="why-cap">የማያ ገጽ የቁልፍ ካርታ</figcaption>
+        </figure>
+        <figure class="why-item" style="--img-w:88%; --cap-gap:2px;">
+          <img src="img/mobile2.png" alt="mobile2">
+          <figcaption class="why-cap">በሁሉም መሣሪያ ተመሳሳይ</figcaption>
+        </figure>
+      </div>
+    </div>
   </section>
-  <section className="mb-6">
-    <h3 className="text-lg font-semibold mb-2">ድምፅ መቀየር</h3>
-    <p className="mb-2">ሥር ፊደልን ከጻፉ በኋላ የሚፈለገውን ድምፅ ቁልፍ ይጫኑ።</p>
-    <img src="img/help/ex2.png" alt="Example 2" />
-  </section>
-  <section>
-    <h3 className="text-lg font-semibold mb-2">የወ ቤተሰብ ፊደሎች መጻፍ</h3>
-    <p className="mb-2">ዉ ቁልፍ በተደጋጋሚ መታ ሊሰራ ይችላል።</p>
-    <img src="img/help/ex3.png" alt="Example 3" />
-  </section>
-</div>
-                </div>
-              </div>
-            </div>
-          )}
+  <!-- END WHY -->
+
+
+  <!-- Section #3: የተጠቃሚ ግምገማዎች -->
+  <section class="sec reviews showcase">
+    <div class="wrap">
+      <div class="rev-grid">
+        <div class="col left">
+          <h2>የተጠቃሚ ግምገማዎች</h2>
+          <ul class="quotes">
+            <li>
+              <blockquote>“ጻፍ ደስ ልትል ጀመረ!”</blockquote>
+              <div class="by">— ሳራ · Addis Ababa</div>
+            </li>
+            <li>
+              <blockquote>“ከፒሲ ጋር ተመሳሳይ ኪቦርድ ነው፣ በቀላሉ ተማርኩ።”</blockquote>
+              <div class="by">— መኩንን · Bahir Dar</div>
+            </li>
+            <li>
+              <blockquote>“Shift/Alt አለመፈለጉ እጅግ ምቹ ነው።”</blockquote>
+              <div class="by">— ሀና · Hawassa</div>
+            </li>
+          </ul>
         </div>
-      );
-    }
+        <figure class="col photo">
+          <img src="img/users.png" alt="ምሳሌ ፎቶ — 9/13 በኋላ እዚህ ይታያል">
+        </figure>
+      </div>
+    </div>
+  </section>
+  <!-- END REVIEWS -->
 
-    const root = ReactDOM.createRoot(document.getElementById('app'));
-    root.render(<RatanamaPlayground />);
-  </script>
+  
+  
+  <!-- Section #4: አሁን ይሞክሩ / Download -->
+  <section class="sec download v3">
+    <div class="wrap">
+      <h2 class="section-title">አሁን ይሞክሩ</h2>
+      <div class="choices wide">
+        <a class="choice try" href="try.html">
+          <img class="ico-img" src="img/icon_keyboard.png" alt="" aria-hidden="true">
+          <span class="label">በመስመር ላይ በቀጥታ ሊሞከር የሚችል ፕሮግራም ነው። በፒሲ ላይ መጠቀም ይቻላል።</span>
+        </a>
+        <a class="choice dl" href="teranama.exe">
+          <span class="ico dl" aria-hidden="true"></span>
+          <span class="label">የማውረድ ማስተካከያ በመካሄድ ላይ…</span>
+        </a>
+      </div>
+    </div>
+  </section>
+  <!-- END DOWNLOAD -->
+
+  
+  <!-- Section #5: mobile showcase (with copy + ribbon) -->
+  <section class="sec mobile v2" id="sec5">
+    <div class="wrap mobile-grid">
+      <div class="mobile-left">
+        <h2 class="section-title">የሞባይልም ሞዴል በቅርቡ ይመጣል።</h2>
+        <p class="lead">ቁልፎቹ ሰፊ ናቸው።</p>
+        <p class="sub">ከፒሲ ጋር ሙሉ በሙሉ ተመሳሳይ ኪቦርድ።</p>
+      </div>
+      <figure class="mobile-right">
+        <div class="mock">
+          <img class="phone" src="img/mobile.png" alt="mobile keyboard">
+          <img class="ribbon" src="img/ribbon.png" alt="">
+        </div>
+      </figure>
+    </div>
+  </section>
+  <!-- END MOBILE -->
+
+<!-- Section #6: Footer (centered v2) -->
+<section class="sec footer v2" id="sec6" role="contentinfo" aria-label="Footer">
+  <div class="wrap foot-center">
+    <a class="contact-btn" href="mailto:" aria-label="Contact us">Contact us</a>
+    <hr class="foot-rule">
+    <p class="copyright">Copyright © 2025 teranama · All rights reserved.</p>
+  </div>
+</section>
+<!-- END FOOTER -->
+
 </body>
-</html>
+</html>  
+
+
+
+
+
+
