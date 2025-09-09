@@ -141,7 +141,7 @@
   <script>
   /* Hit limit override: advance slide after N hits per level; on final, freeze */
   (function(){
-    const LIMITS = {5: 2, 6: 2, 7: 2}; // 레벨별 히트 제한
+    const LIMITS = {5: 60, 6: 60, 7: 60}; // 레벨별 히트 제한
     let hitCount = 0;
     let lastSlide = null;
     function resetIfChanged(){
