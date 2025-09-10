@@ -192,20 +192,24 @@ out.addEventListener('focus', (e) => { e.preventDefault(); document.body.focus()
 
 // Ethiopic helpers
 const getSeriesBase = (cp) => cp - (cp % 8);
-const isEthiopic = (cp) => (cp >= 0x1024 && cp <= 0x137F);
+const isEthiopic = (cp) => (cp >= 0x1200 && cp <= 0x137F);
 
 // Ge'ez order mapping 0..6 (ä,u,i,a,e,ə,o)
 const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6 }; // K 별도 처리
 
 // w-series base map (대표 4계열). 미존재 시 +7 폴백.
 const wSeriesBaseMap = new Map(Object.entries({
-  "ቀ":"ቈ", "ከ":"ኰ", "ገ":"ጐ", "ኸ":"ዀ", "ኀ":"ኈ"
+  "ገ":"ጐ",
+  "ቀ":"ቈ",
+  "ቐ":"ቘ",
+  "ከ":"ኰ",
+  "ኀ":"ኈ"
 }));
 const wBaseSet = new Set([...wSeriesBaseMap.values()]);
 
 // Base groups for 'next' cycling
 const layout = {
-  Q: ["ገ"], W: ["ወ"], E: ["የ"], R: ["አ","ጸ","ጰ"], T: ["ቀ","ዐ","ፀ"], Y: ["ዘ","ዠ"],
+  Q: ["ገ"], W: ["ወ"], E: ["የ"], R: ["አ","ጸ","ጰ"], T: ["ቀ","ዐ","ፀ","ቐ"], Y: ["ዘ","ዠ"],
   A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ","ኀ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
   Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ"],
   M: ["next"]
@@ -222,7 +226,7 @@ const getText = () => out.classList.contains('placeholder') ? '' : out.value;
 const setText = (s) => { if(!s){ setPlaceholder(); } else { out.value = s; out.classList.remove('placeholder'); } };
 const insert = (t) => setText(getText() + t);
 const backspace = () => setText(getText().slice(0, -1));
-const newline = () => insert("\\n");
+const newline = () => insert("\n");
 const space   = () => insert(" ");
 
 // Base insert mapping
@@ -246,11 +250,11 @@ function applyVowelIndex(orderIndex) {
 // K key: ə then w-series
 function onKPress() {
   const prev = getText();
-  if (!prev) { insert("እ"); return; }
+  if (!prev) { beep(); return; }
   const chars = Array.from(prev);
   const i = chars.length - 1;
   const cp = chars[i].codePointAt(0);
-  if (!isEthiopic(cp)) { insert("እ"); return; }
+  if (!isEthiopic(cp)) { beep(); return; }
 
   let base = getSeriesBase(cp);
   let order = cp - base;
@@ -284,12 +288,12 @@ const standaloneByKey = { U:"ኡ", I:"ኢ", O:"ኦ", J:"ኣ", L:"ኤ" };
 function onVowelKey(k) {
   let orderIndex = VOWEL_INDEX[k];
   const prev = getText();
-  if (!prev) { insert(standaloneByKey[k] || ""); return; }
+  if (!prev) { beep(); return; }
 
   const chars = Array.from(prev);
   const last  = chars[chars.length - 1];
   const cp    = last.codePointAt(0);
-  if (!isEthiopic(cp)) { insert(standaloneByKey[k] || ""); return; }
+  if (!isEthiopic(cp)) { beep(); return; }
 
   let base = getSeriesBase(cp);
   let baseChar = String.fromCodePoint(base);
@@ -310,6 +314,30 @@ function onVowelKey(k) {
   setText(chars.join(""));
 }
 
+function beep(){ try{ new AudioContext().close(); }catch(e){} }
+
+// 페이지 전역(다른 함수들과 같은 레벨)에 추가
+let __beep_ctx;
+async function beep(freq=880, duration=0.08) {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    __beep_ctx = __beep_ctx || new AC();
+    if (__beep_ctx.state === 'suspended') await __beep_ctx.resume();
+
+    const osc = __beep_ctx.createOscillator();
+    const gain = __beep_ctx.createGain();
+    osc.type = 'square'; osc.frequency.value = freq;
+
+    const now = __beep_ctx.currentTime;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.connect(gain).connect(__beep_ctx.destination);
+    osc.start(now);
+    osc.stop(now + duration + 0.02);
+  } catch {}
+}
 
 // Next (≫): keep vowel order; wa stays wa
 function nextTransform() {
