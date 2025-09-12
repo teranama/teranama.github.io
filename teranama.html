@@ -6,7 +6,7 @@
   <title>ተራናማ ሙከራ</title>
   <script src="https://cdn.tailwindcss.com"></script>
 <script>
-const BASE_W = 1024, BASE_H = 579;
+const BASE_W = 1024, BASE_H = 606;
 const stage = document.getElementById('stage');
 function fit(){
   const sw = window.innerWidth, sh = window.innerHeight;
@@ -18,7 +18,7 @@ window.addEventListener('resize', fit);
 </script>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script>
-const BASE_W = 1024, BASE_H = 579;
+const BASE_W = 1024, BASE_H = 606;
 const stage = document.getElementById('stage');
 function fit(){
   const sw = window.innerWidth, sh = window.innerHeight;
@@ -30,7 +30,7 @@ window.addEventListener('resize', fit);
 </script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script>
-const BASE_W = 1024, BASE_H = 579;
+const BASE_W = 1024, BASE_H = 606;
 const stage = document.getElementById('stage');
 function fit(){
   const sw = window.innerWidth, sh = window.innerHeight;
@@ -42,7 +42,7 @@ window.addEventListener('resize', fit);
 </script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script>
-const BASE_W = 1024, BASE_H = 579;
+const BASE_W = 1024, BASE_H = 606;
 const stage = document.getElementById('stage');
 function fit(){
   const sw = window.innerWidth, sh = window.innerHeight;
@@ -61,7 +61,7 @@ window.addEventListener('resize', fit);
 }
 #stage{
   position:relative;
-  width:1024px; height:579px;   /* 기준 해상도 고정 */
+  width:1024px; height:606px;   /* 기준 해상도 고정 */
   transform-origin: top left;
 }
 #bgwrap{
@@ -209,7 +209,7 @@ const wBaseSet = new Set([...wSeriesBaseMap.values()]);
 
 // Base groups for 'next' cycling
 const layout = {
-  Q: ["ገ"], W: ["ወ"], E: ["የ"], R: ["አ","ጸ","ጰ"], T: ["ቀ","ዐ","ፀ","ቐ"], Y: ["ዘ","ዠ"],
+  Q: ["ገ", "ጘ"], W: ["ወ"], E: ["የ"], R: ["አ","ጸ","ጰ"], T: ["ቀ","ዐ","ፀ","ቐ"], Y: ["ዘ","ዠ"],
   A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ","ኀ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
   Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ"],
   M: ["next"]
@@ -418,14 +418,14 @@ window.addEventListener('resize', fit);
 const kb = document.getElementById('bgwrap');
 const keyPos = {
   // 1행
-  KeyQ:{x:309,y:479}, KeyW:{x:356,y:479}, KeyE:{x:403,y:479}, KeyR:{x:450,y:479},
-  KeyT:{x:496,y:479}, KeyY:{x:563,y:479}, KeyU:{x:610,y:479}, KeyI:{x:656,y:479}, KeyO:{x:703,y:479},
+  KeyQ:{x:309,y:476}, KeyW:{x:356,y:476}, KeyE:{x:403,y:476}, KeyR:{x:450,y:476},
+  KeyT:{x:496,y:476}, KeyY:{x:563,y:476}, KeyU:{x:610,y:476}, KeyI:{x:656,y:476}, KeyO:{x:703,y:476},
   // 2행
-  KeyA:{x:320,y:517}, KeyS:{x:367,y:517}, KeyD:{x:413,y:517}, KeyF:{x:460,y:517},
-  KeyG:{x:506,y:517}, KeyH:{x:573,y:517}, KeyJ:{x:620,y:517}, KeyK:{x:667,y:517}, KeyL:{x:713,y:517},
+  KeyA:{x:320,y:512}, KeyS:{x:367,y:512}, KeyD:{x:413,y:512}, KeyF:{x:460,y:512},
+  KeyG:{x:506,y:512}, KeyH:{x:573,y:512}, KeyJ:{x:620,y:512}, KeyK:{x:667,y:512}, KeyL:{x:713,y:512},
   // 3행
-  KeyZ:{x:345,y:554}, KeyX:{x:392,y:554}, KeyC:{x:439,y:554}, KeyV:{x:486,y:554},
-  KeyB:{x:532,y:554}, KeyN:{x:599,y:554}, KeyM:{x:646,y:554},
+  KeyZ:{x:345,y:549}, KeyX:{x:392,y:549}, KeyC:{x:439,y:549}, KeyV:{x:486,y:549},
+  KeyB:{x:532,y:549}, KeyN:{x:599,y:549}, KeyM:{x:646,y:549},
 };
 
 function flashAt(x,y){
