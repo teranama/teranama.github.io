@@ -7,7 +7,7 @@
   <style>
     html,body{height:100%;margin:0}
     body{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:#fff;font-family:system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif}
-    .wrap{width:min(1100px, 96vw); margin:16px auto; position:relative;}
+    .wrap{width:min(800px, 96vw); margin:16px auto; position:relative;}
     #myCanvas{width:100%; height:auto; display:block; border-radius:12px; box-shadow: 0 6px 20px rgba(0,0,0,.08);}
     .bar{display:flex;gap:12px;align-items:center; margin:10px 0;}
     .btn{padding:8px 12px;border:1px solid #ccc;border-radius:10px;background:#fafafa;cursor:pointer}
@@ -16,6 +16,8 @@
       background:rgba(255,255,255,.96); z-index:9999;
     }
     #successOverlay{ display:none; }
+	#tutorialText { white-space: pre-line; }
+
   </style>
 </head>
 <body>
@@ -25,11 +27,11 @@
                background-color: #3f6fb8; color: #fff; 
                border: none; border-radius: 8px; cursor: pointer; 
                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-               z-index: 9999;">
+               z-index: 10000;">
   Home
 </button>
   <div class="wrap">
-    <canvas id="myCanvas" width="1200" height="720"></canvas>
+    <canvas id="myCanvas" width="900" height="540"></canvas>
   </div>
   <script src="./script.js"></script>
 
@@ -39,7 +41,7 @@
       <div id="tutorialText" style="margin-bottom:12px; font-size:28px; font-weight:600; text-align:center; color:#333;">
         የሆም ምልክት ያላቸው F እና J የአመልካች ጣት ቦታ ናቸው።
       </div>
-      <img id="tutorialImage" src="./sub/2p_main.png" alt="튜토리얼" style="max-width:min(1100px,96vw); height:auto; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.08);" />
+      <img id="tutorialImage" src="./sub/2p_main.png" alt="튜토리얼" style="max-width:min(800px,96vw); height:auto; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.08);" />
       <div style="margin-top:12px; font-weight:700; font-size:28px; color:#7aa; user-select:none;">ቀጣይ (ስፔስ ባር)</div>
     </div>
   </div>
@@ -61,7 +63,7 @@
     const pages = [
       {img:"./sub/2p_main.png", text:"የሆም ምልክት ያላቸው F እና J የአመልካች ጣት ቦታ ናቸው።"},
       {img:"./sub/3p_main.png", text:"ይህ መደበኛ የጣት አቀማመጥ ነው።"},
-      {img:"./sub/4p_main.png", text:"አሁን እያንዳንዱን ጣት ወደ ላይና ወደ ታች ንቀሳቀሱ። ዝግጁ ከሆናችሁ ስፔስ ባርን ይጫኑ ጨዋታውን ይጀምሩ!"}
+      {img:"./sub/4p_main.png", text:"አሁን እያንዳንዱን ጣት ወደ ላይና ወደ ታች ንቀሳቀሱ።\nዝግጁ ከሆናችሁ ስፔስ ባርን ይጫኑ ጨዋታውን ይጀምሩ!"}
     ];
     // preload
     pages.forEach(p=>{ const im=new Image(); im.src=p.img; });
