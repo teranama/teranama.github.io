@@ -11,6 +11,12 @@
     #myCanvas{width:100%; height:auto; display:block; border-radius:12px; box-shadow: 0 6px 20px rgba(0,0,0,.08);}
     .bar{display:flex;gap:12px;align-items:center; margin:10px 0;}
     .btn{padding:8px 12px;border:1px solid #ccc;border-radius:10px;background:#fafafa;cursor:pointer}
+	.wrap {
+  width:min(800px, 96vw);
+  margin:64px auto;    /* ← 여기서 auto는 좌우, 32px은 위아래 */
+  position:relative;
+}
+
     #tutorialOverlay, #successOverlay{
       position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
       background:rgba(255,255,255,.96); z-index:9999;
