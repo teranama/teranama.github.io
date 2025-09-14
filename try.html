@@ -7,7 +7,7 @@
     body {
       font-family: "Noto Sans KR", sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 0 0 80px 0; /* ← 아래쪽에 60px 여백 */
       background: #fff;
       color: #222;
     }
@@ -115,6 +115,21 @@
     በቀጥታ ሙከራ<br>(እንደገና መግቢያ)
   </button>
 </div>
+
+<div class="mobile" style="margin-top:80px; text-align:center;">
+  <h2 style="font-size:1.8em; margin-bottom:20px;">የሞባይል ኪቦርድ ሙከራ</h2>
+  <p>
+    በስማርትፎንዎ የQR ኮድ ይስክኑ እና አሁኑኑ ያስተሞክሩ።.<br>
+    አሁን በሞባይል ካሉ  
+<a href="mobile_demo.html" style="color:#3f6fb8; font-weight:bold;">እዚህ</a> ይንኩ።
+  </p>
+
+  <!-- 안정적인 QR 이미지 서비스(권장) -->
+  <img
+    src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fteranama.github.io%2Fmobile_demo.html"
+    alt="모바일 체험 QR코드" loading="lazy" decoding="async">
+</div>
+
 
 </body>
 </html>
