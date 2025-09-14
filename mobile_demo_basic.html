@@ -44,7 +44,9 @@
   .row{position:absolute;left:0;right:0;height:calc(var(--row-height) + var(--row-bleed));margin-top:calc(var(--row-bleed)/-2);display:grid;grid-template-columns:repeat(9,1fr);place-items:center}
   .row1{top:var(--row1-top)} .row2{top:var(--row2-top)} .row3{top:var(--row3-top)}
   .row4{position:absolute;left:0;right:0;top:var(--row4-top);height:var(--row4-height);display:grid;grid-template-columns: calc(100% - var(--enter-w)) var(--enter-w);place-items:center}
-  .key{background:transparent;border:none;margin:0;padding:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:manipulation}
+  .key{background:transparent;border:none;margin:0;padding:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;-webkit-touch-callout: none; /* iOS 길게 눌렀을 때 메뉴 차단 */
+  -webkit-user-select: none;   /* 텍스트 선택 차단 */
+  user-select: none;touch-action:manipulation}
   .lbl{font-size:16px;font-weight:800;line-height:1;color:#000;pointer-events:none}
   .vowel .lbl{color:#1a73e8}
   .ghost .lbl{display:none}
@@ -222,7 +224,9 @@ function nextTransform(){
 
 /* ===== 모바일 버튼 연결 ===== */
 const kb = document.getElementById('kb');
-
+kb.addEventListener('contextmenu', e => {
+  e.preventDefault();
+});
 // 삭제키 롱프레스: pointerdown만 사용 (click에서는 실행 안 함)
 let delTimer=null, delRepeater=null, delPressed=false;
 function startDeleteRepeat(){ delPressed=true; backspace(); delTimer=setTimeout(()=>{ delRepeater=setInterval(backspace,60); },400); }
