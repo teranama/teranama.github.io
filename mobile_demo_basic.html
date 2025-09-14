@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Mobile Teranama</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --row1-top: 12%;
+    --row2-top: 29%;
+    --row3-top: 46%;
+    --row4-top: calc(var(--row3-top) + var(--row-height));
+    --row-height: 14%;
+    --row4-height: 13%;
+    --enter-w: 25.6%; /* ≈ 2.3/9 of full width */
+    --row-bleed: 3%;
+	--next-nudge: -3px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:transparent;font-family:"Noto Sans Ethiopic",system-ui,-apple-system,Arial,sans-serif;height:100vh;display:flex;flex-direction:column}
+  #editor{flex:1;width:100%;max-width:560px;min-height:120px;margin:16px auto 10px;padding:14px;font-size:22px;line-height:1.55;word-break:break-word;background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.06);outline:none;white-space: pre-wrap;}
+  #editor::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: black;
+  margin-left: 1px;
+  animation: blink 1s steps(1) infinite;
+  vertical-align: bottom;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+  .frame{position:fixed;bottom:0;left:0;right:0;width:100%;aspect-ratio:375/300;background:transparent url("img/mobileframe.png") no-repeat center bottom/contain}
+  .row{position:absolute;left:0;right:0;height:calc(var(--row-height) + var(--row-bleed));margin-top:calc(var(--row-bleed)/-2);display:grid;grid-template-columns:repeat(9,1fr);place-items:center}
+  .row1{top:var(--row1-top)} .row2{top:var(--row2-top)} .row3{top:var(--row3-top)}
+  .row4{position:absolute;left:0;right:0;top:var(--row4-top);height:var(--row4-height);display:grid;grid-template-columns: calc(100% - var(--enter-w)) var(--enter-w);place-items:center}
+  .key{background:transparent;border:none;margin:0;padding:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:manipulation}
+  .lbl{font-size:24px;font-weight:600;line-height:1;color:#000;pointer-events:none}
+  .vowel .lbl{color:#1a73e8}
+  .ghost .lbl{display:none}
+  .doubleSlot{grid-column:7 / span 3;width:100%;height:100%;display:flex}
+  .doubleSlot .key{width:50%}
+  .noLabel .lbl{display:none}
+ [data-role="next"] .lbl {
+  display:inline-block;
+  transform: translateX(var(--next-nudge));
+}
+
+ 
+</style>
+</head>
+<body>
+  <button id="helpBtn" aria-label="도움말" style="position:fixed;right:12px;top:12px;z-index:50;border:0;background:#fff;border-radius:999px;box-shadow:0 4px 12px rgba(0,0,0,.12);width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer">?</button>
+  <div id="helpModal" style="position:fixed;inset:0;background:rgba(0,0,0,.3);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:49">
+    <div style="background:#fff;border-radius:12px;max-width:420px;width:86%;box-shadow:0 20px 50px rgba(0,0,0,.2)">
+      <div style="padding:14px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
+        <strong>빠른 도움말</strong>
+        <button id="helpClose" aria-label="닫기" style="border:0;background:transparent;font-size:18px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:14px 16px;font-size:14px;line-height:1.6">
+        <ul style="margin:0;padding-left:18px">
+          <li>모음키(U/I/J/L/O)는 현재 글자에 적용될 <em>형</em>을 미리 보여줘요.</li>
+          <li>K는 <b>첫 K</b> → 5형(ə), <b>두 K</b> → w-시리즈로 전환이 가능하면 표시돼요.</li>
+          <li>다음키는 같은 그룹에서 다음 뿌리로 바꾼 결과를 보여줘요. 입력이 없으면 ▶ 로 표시.</li>
+          <li>삭제는 길게 누르면 연속 삭제돼요.</li>
+          <li>스페이스/엔터는 하단 4행에서 감응해요.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="editor" contenteditable="true" spellcheck="false" aria-label="메모장"></div>
+
+  <div class="frame" id="kb">
+    <!-- 1행: (라벨은 참고용) -->
+    <div class="row row1">
+      <button class="key"><span class="lbl">ገጘ</span></button>
+      <button class="key"><span class="lbl">ወፀ</span></button>
+      <button class="key"><span class="lbl">የጸ</span></button>
+      <button class="key"><span class="lbl">አጰ</span></button>
+      <button class="key"><span class="lbl">ቀቐ</span></button>
+      <button class="key"><span class="lbl">ፐዐ</span></button>
+      <button class="key vowel" data-vowel="U"><span class="lbl">ኡ</span></button>
+      <button class="key vowel" data-vowel="I"><span class="lbl">ኢ</span></button>
+      <button class="key vowel" data-vowel="O"><span class="lbl">ኦ</span></button>
+    </div>
+
+    <!-- 2행 -->
+    <div class="row row2">
+      <button class="key"><span class="lbl">ተቸ</span></button>
+      <button class="key"><span class="lbl">ረፈ</span></button>
+      <button class="key"><span class="lbl">ነኘ</span></button>
+      <button class="key"><span class="lbl">መሐ</span></button>
+      <button class="key"><span class="lbl">ከኸ</span></button>
+      <button class="key"><span class="lbl">ጠጨ</span></button>
+      <button class="key vowel" data-vowel="J"><span class="lbl">ኣ</span></button>
+      <button class="key vowel" data-role="k"><span class="lbl">እዉ</span></button>
+      <button class="key vowel" data-vowel="L"><span class="lbl">ኤ</span></button>
+    </div>
+
+    <!-- 3행 -->
+    <div class="row row3">
+      <button class="key"><span class="lbl">ደጀ</span></button>
+      <button class="key"><span class="lbl">ሰሸ</span></button>
+      <button class="key"><span class="lbl">ለኀ</span></button>
+      <button class="key"><span class="lbl">በቨ</span></button>
+      <button class="key"><span class="lbl">ዘዠ</span></button>
+      <button class="key"><span class="lbl">ሀሠ</span></button>
+      <div class="doubleSlot">
+        <button class="key vowel ghost" data-role="next"><span class="lbl"></span></button>
+        <button class="key ghost" data-role="backspace"><span class="lbl"></span></button>
+      </div>
+    </div>
+
+    
+<!-- 4행: [SPACE | ENTER] -->
+    <div class="row4 noLabel">
+      <button class="key" data-role="space"><span class="lbl">Space</span></button>
+      <button class="key" data-role="enter"><span class="lbl">Enter</span></button>
+    </div>
+  </div>
+
+<script>
+
+/* ===== PC 엔진에서 가져온 규칙과 동일하게 구성 ===== */
+const out = document.getElementById('editor');
+const getText = () => out.textContent || "";
+const setText = (s) => { out.textContent = s; };
+const insert = (t) => setText(getText() + t);
+const backspace = () => setText(getText().slice(0, -1));
+const newline = () => insert("\n");
+const space = () => insert(" ");
+
+const getSeriesBase = (cp) => cp - (cp % 8);
+const isEthiopic = (cp) => (cp >= 0x1200 && cp <= 0x137F);
+
+/* 모음 인덱스 (PC와 동일) */
+const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6 };
+
+/* w-series base */
+const wSeriesBaseMap = new Map(Object.entries({
+  "ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"
+}));
+const wBaseSet = new Set([...wSeriesBaseMap.values()]);
+
+/* next 그룹 */
+const layoutGroups = {
+  Q:["ገ","ጘ"], W:["ወ","ፀ"], E:["የ","ጸ"], R:["አ","ጰ"], T:["ቀ","ቐ"], Y:["ፐ","ዐ"],
+  A:["ተ","ቸ"], S:["ረ","ፈ"], D:["ነ","ኘ"], F:["መ","ሐ"], G:["ከ","ኸ"], H:["ጠ","ጨ"],
+  Z:["ደ","ጀ"], X:["ሰ","ሸ"], C:["ለ","ኀ"], V:["በ","ቨ"], B:["ዘ","ዠ"], N:["ሀ","ሠ"]
+};
+const baseToGroup = new Map(); for (const arr of Object.values(layoutGroups)) for (const ch of arr) baseToGroup.set(ch, arr);
+
+/* 모음키 처리 */
+function onVowelKey(k){
+  let orderIndex = VOWEL_INDEX[k];
+  const prev = getText(); if (!prev) return;
+  const chars = Array.from(prev);
+  const last = chars[chars.length-1];
+  const cp = last.codePointAt(0); if(!isEthiopic(cp)) return;
+
+  let base = getSeriesBase(cp);
+  let baseChar = String.fromCodePoint(base);
+  const order = cp - base;
+
+  const inW = (order === 7) || wBaseSet.has(baseChar);
+  if (inW && k === 'O') orderIndex = 5; // wa+O → ə
+
+  chars[chars.length-1] = String.fromCodePoint(base + orderIndex);
+  setText(chars.join(""));
+}
+
+/* K: 첫 K → 5형(ə), 두 번째 K → w-series 진입(가능하면), 이미 w-series면 베이스로 */
+function onKPress(){
+  const prev = getText(); if (!prev) return;
+  const chars = Array.from(prev); const i = chars.length-1;
+  const cp = chars[i].codePointAt(0); if(!isEthiopic(cp)) return;
+
+  let base = getSeriesBase(cp);
+  let order = cp - base;
+  let baseChar = String.fromCodePoint(base);
+
+  if (wBaseSet.has(baseChar) || order === 7){
+    const wBaseChar = wBaseSet.has(baseChar) ? baseChar : wSeriesBaseMap.get(baseChar);
+    if (wBaseChar){ chars[i] = wBaseChar; setText(chars.join("")); return; }
+  }
+  if (order !== 5){ chars[i] = String.fromCodePoint(base + 5); }
+  else { const wBaseChar = wSeriesBaseMap.get(baseChar); chars[i] = wBaseChar ? wBaseChar : String.fromCodePoint(base + 7); }
+  setText(chars.join(""));
+}
+
+/* next: 모음/wa 유지 */
+function nextTransform(){
+  const prev = getText(); if(!prev) return;
+  const chars = Array.from(prev); const i = chars.length-1;
+  const cp = chars[i].codePointAt(0); if(!isEthiopic(cp)) return;
+
+  const base = getSeriesBase(cp); const order = cp - base;
+  const baseChar = String.fromCodePoint(base);
+  const group = baseToGroup.get(baseChar); if(!group || group.length<2) return;
+  const idx = group.indexOf(baseChar);
+  const nextBaseChar = group[(idx+1)%group.length]; const nextBase = nextBaseChar.codePointAt(0);
+
+  if (order === 7){
+    const wBase = wSeriesBaseMap.get(nextBaseChar);
+    chars[i] = wBase ? wBase : String.fromCodePoint(nextBase + 7);
+  } else {
+    chars[i] = String.fromCodePoint(nextBase + order);
+  }
+  setText(chars.join(""));
+}
+
+/* ===== 모바일 버튼 연결 ===== */
+const kb = document.getElementById('kb');
+
+// 삭제키 롱프레스: pointerdown만 사용 (click에서는 실행 안 함)
+let delTimer=null, delRepeater=null, delPressed=false;
+function startDeleteRepeat(){ delPressed=true; backspace(); delTimer=setTimeout(()=>{ delRepeater=setInterval(backspace,60); },400); }
+function stopDeleteRepeat(){ delPressed=false; if(delTimer){clearTimeout(delTimer);delTimer=null;} if(delRepeater){clearInterval(delRepeater);delRepeater=null;} }
+
+kb.addEventListener('pointerdown',(e)=>{
+  const btn = e.target.closest('.key'); if(!btn) return;
+  const role = btn.dataset.role;
+  if (role === 'backspace') startDeleteRepeat();
+},{passive:true});
+kb.addEventListener('pointerup', stopDeleteRepeat, {passive:true});
+kb.addEventListener('pointercancel', stopDeleteRepeat, {passive:true});
+kb.addEventListener('pointerleave', stopDeleteRepeat, {passive:true});
+
+kb.addEventListener('click',(e)=>{
+  const btn = e.target.closest('.key'); if(!btn) return;
+  const role = btn.dataset.role;
+  if (role === 'backspace') return; // pointerdown에서 처리됨(중복 방지)
+  if (role === 'next'){ nextTransform(); return; }
+  if (role === 'space'){ space(); return; }
+  if (role === 'enter'){ newline(); return; }
+  if (role === 'k'){ onKPress(); return; }
+
+  const vowel = btn.dataset.vowel;
+  if (vowel){ onVowelKey(vowel); return; }
+
+  const label = btn.querySelector('.lbl')?.textContent || "";
+  const chars = Array.from(label);
+  if (!chars.length) return;
+  insert(chars[0]);
+});
+</script>
+
+
+<script>
+(function(){
+  const out = document.getElementById('editor');
+  const kb  = document.getElementById('kb');
+
+  const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6 };
+  const wSeriesBaseMap = new Map(Object.entries({
+    "ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"
+  }));
+  const wBaseSet = new Set([...wSeriesBaseMap.values()]);
+
+  const layoutGroups = {
+    Q:["ገ","ጘ"], W:["ወ","ፀ"], E:["የ","ጸ"], R:["አ","ጰ"], T:["ቀ","ቐ"], Y:["ፐ","ዐ"],
+    A:["ተ","ቸ"], S:["ረ","ፈ"], D:["ነ","ኘ"], F:["መ","ሐ"], G:["ከ","ኸ"], H:["ጠ","ጨ"],
+    Z:["ደ","ጀ"], X:["ሰ","ሸ"], C:["ለ","ኀ"], V:["በ","ቨ"], B:["ዘ","ዠ"], N:["ሀ","ሠ"]
+  };
+  const baseToGroup = new Map(); for(const arr of Object.values(layoutGroups)) for(const ch of arr) baseToGroup.set(ch, arr);
+
+  const isEth = cp => cp>=0x1200 && cp<=0x137F;
+  const baseOf = cp => cp - (cp % 8);
+
+  // capture defaults once so we can reset
+  const defaults = {};
+  function cacheDefault(sel, fallback){
+    const el = kb.querySelector(sel);
+    if (!el) return;
+    defaults[sel] = el.textContent || fallback || '';
+  }
+  cacheDefault('[data-role="next"] .lbl', '▶');
+  cacheDefault('[data-role="k"] .lbl', 'K');
+  ['U','I','O','J','L'].forEach(ch => cacheDefault(`[data-vowel="${ch}"] .lbl`, ch));
+
+  function lastEthiopicChar(){
+    const t = out.textContent || "";
+    const arr = Array.from(t);
+    for(let i=arr.length-1;i>=0;i--){
+      const cp = arr[i].codePointAt(0);
+      if(isEth(cp)) return arr[i];
+    }
+    return null;
+  }
+  function endsWithWhitespace(){
+    const t = out.textContent || "";
+    return /\s$/.test(t);
+    // this covers space/newline tabs etc. If empty string, it's false.
+  }
+
+  function nextOf(ch){
+    const cp = ch.codePointAt(0);
+    const base = baseOf(cp);
+    const order = cp - base;
+    const baseChar = String.fromCodePoint(base);
+    const group = baseToGroup.get(baseChar);
+    if(!group || group.length<2) return null;
+    const idx = group.indexOf(baseChar);
+    const nextBaseChar = group[(idx+1)%group.length];
+    const nextBase = nextBaseChar.codePointAt(0);
+    if(order===7){
+      const wBase = wSeriesBaseMap.get(nextBaseChar);
+      return wBase ? wBase : String.fromCodePoint(nextBase + 7);
+    }
+    return String.fromCodePoint(nextBase + order);
+  }
+
+  function vowelPreview(ch, key){
+    let ord = VOWEL_INDEX[key];
+    const cp = ch.codePointAt(0);
+    const base = baseOf(cp);
+    const order = cp - base;
+    const baseChar = String.fromCodePoint(base);
+    const inW = (order===7) || wBaseSet.has(baseChar);
+    if(inW && key==='O') ord = 5; // wa+O → ə
+    return String.fromCodePoint(base + ord);
+  }
+
+  function kPreview(ch){
+    const cp = ch.codePointAt(0);
+    const base = baseOf(cp);
+    const baseChar = String.fromCodeCodePoint ? String.fromCodeCodePoint(base) : String.fromCodePoint(base);
+    const first = String.fromCodePoint(base + 5);   // 5형
+    const wBase = wSeriesBaseMap.get(baseChar);
+    const second = wBase ? wBase : String.fromCodePoint(base + 7); // w-base or 7형
+    return first + second; // 붙여쓰기 (공백 제거)
+  }
+
+  function setText(sel, text, forceShow=false){
+    const el = kb.querySelector(sel);
+    if (!el) return;
+    el.textContent = text;
+    if (forceShow) el.style.display = 'block';
+  }
+
+  function resetPreviewsToDefault(){
+    setText('[data-role="next"] .lbl', defaults['[data-role="next"] .lbl'] || '▶', true);
+    setText('[data-role="k"] .lbl', defaults['[data-role="k"] .lbl'] || 'K');
+    ['U','I','O','J','L'].forEach(ch=>{
+      const sel = `[data-vowel="${ch}"] .lbl`;
+      setText(sel, defaults[sel] || ch);
+    });
+  }
+
+  function updatePreviews(){
+    // reset rule: if last char is whitespace or no Ethiopic char exists → defaults
+    const lastEth = lastEthiopicChar();
+    if (!lastEth || endsWithWhitespace()){
+      resetPreviewsToDefault();
+      return;
+    }
+    // NEXT
+    const next = nextOf(lastEth);
+    setText('[data-role="next"] .lbl', next || '▶', true);
+    // K
+    setText('[data-role="k"] .lbl', kPreview(lastEth));
+    // Vowels
+    [['U'],['I'],['O'],['J'],['L']].forEach(([key])=>{
+      setText(`[data-vowel="${key}"] .lbl`, vowelPreview(lastEth, key));
+    });
+  }
+
+  // updates after any click and on load
+  kb.addEventListener('click', ()=> setTimeout(updatePreviews, 0));
+  window.addEventListener('load', ()=>{ resetPreviewsToDefault(); updatePreviews(); });
+
+  // Help modal (unchanged)
+  const helpBtn = document.getElementById('helpBtn');
+  const helpModal = document.getElementById('helpModal');
+  const helpClose = document.getElementById('helpClose');
+  if(helpBtn && helpModal){
+    const open = ()=>{ helpModal.style.display='flex'; };
+    const close = ()=>{ helpModal.style.display='none'; };
+    helpBtn.addEventListener('click', open);
+    helpClose && helpClose.addEventListener('click', close);
+    helpModal.addEventListener('click', (e)=>{ if(e.target===helpModal) close(); });
+  }
+})();
+</script>
+
+
+</body>
+</html>
