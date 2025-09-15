@@ -7,8 +7,8 @@
   --logo-top: 24px;
   --logo-width: 160px;  /* 전체 로고 폭 */
   /* COPY (bottom-left) */
-  --copy-left: 88px;
-  --copy-bottom: 72px;
+  --copy-left: 7%;
+  --copy-bottom: 12%;
   --copy-size: 36px;
   --bubble-left: -100%;  /* relative to copy-block left */
   --bubble-bottom: 112px; /* relative to bottom baseline */
@@ -52,7 +52,14 @@ html,body{margin:0;padding:0;background:#fff;}
 }
 .copy{
   margin:0; font-family:'Noto Sans Ethiopic',sans-serif;
-  font-size:var(--copy-size); font-weight:900; color:#111; letter-spacing:.02em;
+    /* 반응형 크기 */
+  font-size: clamp(20px, 6vw, 56px);
+  font-weight:900; color:#111; letter-spacing:.02em;
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+
+
 }
 .bubble{
   position:absolute;
@@ -61,7 +68,7 @@ html,body{margin:0;padding:0;background:#fff;}
   width:var(--bubble-size); height:var(--bubble-size); object-fit:contain;
 }
 @media (max-width: 900px){
-  :root{ --copy-size: 32px; --logo-mark-size:60px; --logo-word-width:104px; }
+  :root{ --copy-size: 16px; --logo-mark-size:20px; --logo-word-width:34px; }
 }
 
 
