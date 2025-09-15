@@ -61,7 +61,7 @@ html,body{margin:0;padding:0;background:#fff;}
 }
 
 .subcopy{
-  font-size: clamp(14px, 6vw, 40px);
+  font-size: clamp(12px, 6vw, 40px);
   text-align: left;
   font-weight: 400;      /* 굵기 */
   color: #444;           /* 색상 */
@@ -79,7 +79,7 @@ html,body{margin:0;padding:0;background:#fff;}
     --copy-size: 16px;
     --logo-mark-size: 20px;
     --logo-word-width: 34px;
-    --subcopy-size: 14px;   /* 모바일에서 더 작게 */
+    --subcopy-size: 12px;   /* 모바일에서 더 작게 */
   }
 }
 
