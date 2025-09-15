@@ -54,7 +54,7 @@
   }
 
   /* 기본 라벨은 가볍게 — 모음/다음에서 덮어씀 */
-  .lbl{ font-weight:400 !important; font-size:26px !important; line-height:1; color:#000; pointer-events:none }
+  .lbl{ font-weight:450 !important; font-size:26px !important; line-height:1; color:#000; pointer-events:none }
 
   .vowel .lbl{ color:#1a73e8 }
   .ghost .lbl{ display:none }
@@ -66,7 +66,7 @@
 
 /* K(두 글자)만 축소 */
 .key[data-role="k"] .lbl{
-  font-weight: 400 !important;
+  font-weight: 450 !important;
   font-size: calc(var(--vowel-size, 26px) * 0.88) !important;
   transform: translate(var(--vowel-x,0), var(--vowel-y,4px)) !important;
   letter-spacing: 0.2px;
@@ -74,7 +74,7 @@
 
 /* 다음키는 축소 없이 풀 사이즈 */
 .key[data-role="next"] .lbl{
-  font-weight: 400 !important;
+  font-weight: 450 !important;
   font-size: var(--vowel-size, 26px) !important;
   transform: translate(var(--next-x, -16.7%), var(--next-y, 4px)) !important;
   display: inline-block !important;
@@ -83,7 +83,7 @@
 
 /* 모든 라벨 기본은 얇게 (이걸 기반으로 모음/다음만 볼드) */
 .lbl{
-  font-weight: 500 !important;
+  font-weight: 450 !important;
   font-size: 26px !important;
   line-height: 1;
   font-family: "Abyssinica SIL","Noto Sans Ethiopic",system-ui,-apple-system,Arial,sans-serif !important;
@@ -91,7 +91,7 @@
 
 /* 모음(파란 글자)만 확실히 볼드+크게+살짝 아래로 */
 .vowel .lbl{
-  font-weight: 500 !important; 
+  font-weight: 450 !important; 
   font-size: var(--vowel-size, 26px) !important;
   transform: translate(var(--vowel-x,0), var(--vowel-y,4px)) !important;
   font-family: "Abyssinica SIL","Noto Sans Ethiopic",system-ui,-apple-system,Arial,sans-serif !important;
