@@ -8,7 +8,7 @@
   --logo-width: 12%;  /* 전체 로고 폭 */
   /* COPY (bottom-left) */
   --copy-left: 7%;
-  --copy-bottom: 12%;
+  --copy-bottom: 6%;
   --copy-size: 36px;
   --bubble-left: -100%;  /* relative to copy-block left */
   --bubble-bottom: 112px; /* relative to bottom baseline */
@@ -57,10 +57,17 @@ html,body{margin:0;padding:0;background:#fff;}
   font-weight:900; color:#111; letter-spacing:.02em;
   font-weight: 900;
   line-height: 1.2;
-  text-align: center;
-
-
+  text-align: left;
 }
+
+.subcopy{
+  font-size: clamp(18px, 6vw, 40px);
+  text-align: left;
+  font-weight: 400;      /* 굵기 */
+  color: #444;           /* 색상 */
+  margin-top: 8px;       /* 위쪽 간격 */
+}
+
 .bubble{
   position:absolute;
   left:calc(var(--bubble-left) * -1);
