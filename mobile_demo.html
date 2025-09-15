@@ -48,7 +48,11 @@
   .key{background:transparent;border:none;margin:0;padding:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;-webkit-touch-callout: none; /* iOS 길게 눌렀을 때 메뉴 차단 */
   -webkit-user-select: none;   /* 텍스트 선택 차단 */
   user-select: none;touch-action:manipulation}
-  .lbl{font-size:16px;font-weight:400;line-height:1;color:#000;pointer-events:none}
+  .lbl{
+  font-weight: 400 !important;
+  font-size: 22px;        /* 필요시 조절 */
+  line-height: 1;
+}
   .vowel .lbl{color:#1a73e8}
   .ghost .lbl{display:none}
   .doubleSlot{grid-column:7 / span 3;width:100%;height:100%;display:flex}
@@ -69,11 +73,13 @@
 	--next-nudge: -28%;   /* ← 윗줄 ‘7번째 칸’(U/J) 센터에 정렬 */
   }
   /* 파란 글자(모음) + K + 다음키만 Bold */
-.vowel .lbl,
-.key[data-role="k"] .lbl,
-.key[data-role="next"] .lbl{
-  font-family: "Noto Sans Ethiopic", system-ui, -apple-system, Arial, sans-serif; /* 폰트 고정 */
-  font-weight:700;  /* 진짜 볼드 가중치 */
+/* 2) 모음(파란 글자)만 진하게 + 크게 */
+.key.vowel .lbl{
+  font-weight: 700 !important;              /* Ethiopic는 700이 실볼드 */
+  font-size: var(--vowel-size, 22px) !important;
+  /* 위치 미세조정 필요시
+  transform: translate(var(--vowel-x,0), var(--vowel-y,0));
+  */
 }
 
   .key[data-role="k"] .lbl{
