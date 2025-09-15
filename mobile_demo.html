@@ -71,19 +71,40 @@
     transform:translate(var(--vowel-x), var(--vowel-y)) !important;
   }
   /* K 키(두 글자 프리뷰) */
-  .key[data-role="k"] .lbl{
-    font-weight:700 !important;
-    font-size:calc(var(--vowel-size) * var(--k-scale)) !important;
-    transform:translate(var(--vowel-x), var(--vowel-y)) !important;
-    letter-spacing:0.2px;
-  }
-  /* 다음키 프리뷰(▶ 아이콘은 이미지에 고정) */
-  .key[data-role="next"] .lbl{
-    font-weight:700 !important;
-    font-size:calc(var(--vowel-size) * var(--k-scale)) !important;
-    transform:translate(var(--next-x), var(--next-y)) !important;
-    display:inline-block !important;
-  }
+/* K(두 글자)만 축소 */
+.key[data-role="k"] .lbl{
+  font-weight: 700 !important;
+  font-size: calc(var(--vowel-size, 24px) * 0.88) !important;
+  transform: translate(var(--vowel-x,0), var(--vowel-y,4px)) !important;
+  letter-spacing: 0.2px;
+}
+
+/* 다음키는 축소 없이 풀 사이즈 */
+.key[data-role="next"] .lbl{
+  font-weight: 700 !important;
+  font-size: var(--vowel-size, 24px) !important;
+  transform: translate(var(--next-x, -16.7%), var(--next-y, 4px)) !important;
+  display: inline-block !important;
+}
+/* 모든 라벨 기본은 얇게 (이걸 기반으로 모음/다음만 볼드) */
+.lbl{
+  font-weight: 400 !important;
+  font-size: 16px !important;
+  line-height: 1;
+  font-family: "Noto Sans Ethiopic", system-ui, -apple-system, Arial, sans-serif !important;
+}
+
+/* 모음(파란 글자)만 확실히 볼드+크게+살짝 아래로 */
+.vowel .lbl{
+  font-weight: 700 !important;                 /* Noto Ethiopic는 700이 실볼드 */
+  font-size: var(--vowel-size, 24px) !important;
+  transform: translate(var(--vowel-x,0), var(--vowel-y,4px)) !important;
+  font-family: "Noto Sans Ethiopic", system-ui, -apple-system, Arial, sans-serif !important;
+}
+
+/* 시각적 두께가 여전히 약하면(윈도우 렌더링) 보정 한 줄 */
+.vowel .lbl{ text-shadow: 0 0.3px 0 currentColor, 0 -0.3px 0 currentColor, 0.3px 0 0 currentColor, -0.3px 0 0 currentColor; }
+
 </style>
 
 </head>
