@@ -25,7 +25,7 @@ html,body{margin:0;padding:0;background:#fff;}
   overflow:hidden;
 }
 .hero-subtitle {
-  font-size: 36px;       /* 서브 문구는 조금 작게 */
+  font-size: 12px;       /* 서브 문구는 조금 작게 */
   font-weight: 400;
   text-align: center;
   color: #333;           /* 필요시 색상 조절 */
