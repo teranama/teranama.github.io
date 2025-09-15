@@ -61,7 +61,7 @@ html,body{margin:0;padding:0;background:#fff;}
 }
 
 .subcopy{
-  font-size: clamp(18px, 6vw, 40px);
+  font-size: clamp(14px, 6vw, 40px);
   text-align: left;
   font-weight: 400;      /* 굵기 */
   color: #444;           /* 색상 */
