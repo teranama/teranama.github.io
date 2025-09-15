@@ -74,8 +74,13 @@ html,body{margin:0;padding:0;background:#fff;}
   bottom:calc(var(--bubble-bottom) - var(--copy-size));
   width:var(--bubble-size); height:var(--bubble-size); object-fit:contain;
 }
-@media (max-width: 900px){
-  :root{ --copy-size: 16px; --logo-mark-size:20px; --logo-word-width:34px; }
+@media (max-width: 900px) {
+  :root {
+    --copy-size: 16px;
+    --logo-mark-size: 20px;
+    --logo-word-width: 34px;
+    --subcopy-size: 14px;   /* 모바일에서 더 작게 */
+  }
 }
 
 
