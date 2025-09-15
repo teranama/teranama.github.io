@@ -3,9 +3,9 @@
   --w: 1183; /* px */
   --h: 518;  /* px */
   /* LOGO block (top-right) */
-  --logo-right: 44px;
-  --logo-top: 24px;
-  --logo-width: 160px;  /* 전체 로고 폭 */
+  --logo-right: 3%;
+  --logo-top: 4%;
+  --logo-width: 12%;  /* 전체 로고 폭 */
   /* COPY (bottom-left) */
   --copy-left: 7%;
   --copy-bottom: 12%;
