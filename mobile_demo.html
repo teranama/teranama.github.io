@@ -4,7 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Mobile Teranama</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
   :root{
     --row1-top: 31%;
@@ -47,7 +48,7 @@
   .key{background:transparent;border:none;margin:0;padding:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;-webkit-touch-callout: none; /* iOS 길게 눌렀을 때 메뉴 차단 */
   -webkit-user-select: none;   /* 텍스트 선택 차단 */
   user-select: none;touch-action:manipulation}
-  .lbl{font-size:16px;font-weight:900;line-height:1;color:#000;pointer-events:none}
+  .lbl{font-size:16px;font-weight:400;line-height:1;color:#000;pointer-events:none}
   .vowel .lbl{color:#1a73e8}
   .ghost .lbl{display:none}
   .doubleSlot{grid-column:7 / span 3;width:100%;height:100%;display:flex}
@@ -65,17 +66,25 @@
     --vowel-size: 22px;    /* increase if you want even bigger */
     --k-scale: 0.9;       /* K shows two glyphs; keep a bit smaller */
 	--vowel-x: 0px; --vowel-y: 6px;
+	--next-nudge: -16.7%;   /* ← 윗줄 ‘7번째 칸’(U/J) 센터에 정렬 */
   }
-  .vowel .lbl{ 
-    font-size: var(--vowel-size);
-	font-weight: 800;
-	transform: translate(var(--vowel-x), var(--vowel-y));
-  }
+  /* 파란 글자(모음) + K + 다음키만 Bold */
+.vowel .lbl,
+.key[data-role="k"] .lbl,
+.key[data-role="next"] .lbl{
+  font-family: "Noto Sans Ethiopic", system-ui, -apple-system, Arial, sans-serif; /* 폰트 고정 */
+  font-weight:700;  /* 진짜 볼드 가중치 */
+}
+
   .key[data-role="k"] .lbl{
     font-size: calc(var(--vowel-size) * var(--k-scale));
     letter-spacing: 0.5px;
     font-weight: 800;
   }
+[data-role="next"] .lbl{
+  display:inline-block;
+  transform: translateX(var(--next-nudge));
+}
 
 </style>
 </head>
