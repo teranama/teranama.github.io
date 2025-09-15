@@ -89,7 +89,7 @@
       <button class="key"><span class="lbl">የጸ</span></button>
       <button class="key"><span class="lbl">አጰ</span></button>
       <button class="key"><span class="lbl">ቀቐ</span></button>
-      <button class="key"><span class="lbl">ፐዐ</span></button>
+      <button class="key"><span class="lbl">ዘዠ</span></button>
       <button class="key vowel" data-vowel="U"><span class="lbl">ኡ</span></button>
       <button class="key vowel" data-vowel="I"><span class="lbl">ኢ</span></button>
       <button class="key vowel" data-vowel="O"><span class="lbl">ኦ</span></button>
@@ -97,7 +97,7 @@
 
     <!-- 2행 -->
     <div class="row row2">
-      <button class="key"><span class="lbl">ተቸ</span></button>
+      <button class="key"><span class="lbl">ተፐ</span></button>
       <button class="key"><span class="lbl">ረፈ</span></button>
       <button class="key"><span class="lbl">ነኘ</span></button>
       <button class="key"><span class="lbl">መሐ</span></button>
@@ -114,8 +114,8 @@
       <button class="key"><span class="lbl">ሰሸ</span></button>
       <button class="key"><span class="lbl">ለኀ</span></button>
       <button class="key"><span class="lbl">በቨ</span></button>
-      <button class="key"><span class="lbl">ዘዠ</span></button>
       <button class="key"><span class="lbl">ሀሠ</span></button>
+      <button class="key"><span class="lbl">ቸዐ</span></button>
       <div class="doubleSlot">
         <button class="key vowel ghost" data-role="next"><span class="lbl"></span></button>
         <button class="key ghost" data-role="backspace"><span class="lbl"></span></button>
@@ -155,9 +155,9 @@ const wBaseSet = new Set([...wSeriesBaseMap.values()]);
 
 /* next 그룹 */
 const layoutGroups = {
-  Q:["ገ","ጘ"], W:["ወ","ፀ"], E:["የ","ጸ"], R:["አ","ጰ"], T:["ቀ","ቐ"], Y:["ፐ","ዐ"],
-  A:["ተ","ቸ"], S:["ረ","ፈ"], D:["ነ","ኘ"], F:["መ","ሐ"], G:["ከ","ኸ"], H:["ጠ","ጨ"],
-  Z:["ደ","ጀ"], X:["ሰ","ሸ"], C:["ለ","ኀ"], V:["በ","ቨ"], B:["ዘ","ዠ"], N:["ሀ","ሠ"]
+  Q: ["ገ", "ጘ"], W: ["ወ","ፀ"], E: ["የ","ጸ"], R: ["አ","ጰ"], T: ["ቀ","ቐ"], Y: ["ዘ","ዠ"],
+  A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
+  Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ","ኀ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ","ዐ"]
 };
 const baseToGroup = new Map(); for (const arr of Object.values(layoutGroups)) for (const ch of arr) baseToGroup.set(ch, arr);
 
@@ -271,9 +271,9 @@ kb.addEventListener('click',(e)=>{
   const wBaseSet = new Set([...wSeriesBaseMap.values()]);
 
   const layoutGroups = {
-    Q:["ገ","ጘ"], W:["ወ","ፀ"], E:["የ","ጸ"], R:["አ","ጰ"], T:["ቀ","ቐ"], Y:["ፐ","ዐ"],
-    A:["ተ","ቸ"], S:["ረ","ፈ"], D:["ነ","ኘ"], F:["መ","ሐ"], G:["ከ","ኸ"], H:["ጠ","ጨ"],
-    Z:["ደ","ጀ"], X:["ሰ","ሸ"], C:["ለ","ኀ"], V:["በ","ቨ"], B:["ዘ","ዠ"], N:["ሀ","ሠ"]
+    Q: ["ገ", "ጘ"], W: ["ወ","ፀ"], E: ["የ","ጸ"], R: ["አ","ጰ"], T: ["ቀ","ቐ"], Y: ["ዘ","ዠ"],
+  A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
+  Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ","ኀ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ","ዐ"]
   };
   const baseToGroup = new Map(); for(const arr of Object.values(layoutGroups)) for(const ch of arr) baseToGroup.set(ch, arr);
 
