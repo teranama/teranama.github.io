@@ -92,7 +92,12 @@
 /* 모음(파란 글자)만 확실히 볼드+크게+살짝 아래로 */
 .vowel .lbl{}
 
-
+.key[data-role="next"] .hint {
+  font-weight: 400;         /* ⬈만 굵게 */
+  font-size: 16px;          /* 필요하면 키우기 */
+  font-family: Arial, sans-serif; /* 원하는 경우 폰트 변경 */
+  color: #999;              /* 회색 유지 */
+}
 
 
 /* Fix vowel position (U/I/O/J/L) to align baseline with K and Next */
@@ -117,7 +122,7 @@
       </div>
       <div style="padding:14px 16px;font-size:14px;line-height:1.6">
         <ul style="margin:0;padding-left:18px">
-          <li>በአንድ ቁልፍ ላይ ያሉትን የኋላ ፊደሎች ለመጻፍ መጀመሪያ ያንን ቁልፍ ከዚያም የቀጣዩን መስፋፊያ (↗) ይጫኑ።</li>
+          <li>በአንድ ቁልፍ ላይ ያሉትን የኋላ ፊደሎች ለመጻፍ መጀመሪያ ያንን ቁልፍ ከዚያም የቀጣዩን መስፋፊያ (⬈) ይጫኑ።</li>
           <li>ሰማያዊ የተለዩ የሞል ቁልፎች ብቻቸውን አይገቡም። መጀመሪያ ሥር ያለውን አ ይጫኑ።</li>
           <li>በሞል ቁልፍ ላይ ያለው ዉ ለመጻፍ ያንኑ ቁልፍ በተከታታይ ሁለት ጊዜ ይጫኑ።</li>
         </ul>
@@ -333,7 +338,7 @@ kb.addEventListener('click',(e)=>{
     if (!el) return;
     defaults[sel] = el.textContent || fallback || '';
   }
-  cacheDefault('[data-role="next"] .lbl', '');
+  cacheDefault('[data-role="next"] .lbl', '⬈');
   cacheDefault('[data-role="k"] .lbl', 'K');
   ['U','I','O','J','L'].forEach(ch => cacheDefault(`[data-vowel="${ch}"] .lbl`, ch));
 
@@ -398,7 +403,7 @@ kb.addEventListener('click',(e)=>{
   }
 
   function resetPreviewsToDefault(){
-    setText('[data-role="next"] .lbl', '', true);
+    setText('[data-role="next"] .lbl', '⬈', true);
     (function(){const el = kb.querySelector('[data-role="next"] .lbl'); if(el) el.style.color = '#999';})();
     setText('[data-role="k"] .lbl', defaults['[data-role="k"] .lbl'] || 'K');
     (function(){const el = kb.querySelector('[data-role="k"] .lbl'); if(el) el.style.color = '#999';})();
@@ -419,7 +424,7 @@ kb.addEventListener('click',(e)=>{
     }
     // NEXT
     const next = nextOf(lastEth);
-    setText('[data-role="next"] .lbl', next || '', true);
+    setText('[data-role="next"] .lbl', next || '⬈', true);
     (function(){const el = kb.querySelector('[data-role="next"] .lbl'); if(el) el.style.color = '#1a73e8';})();
     // K
     setText('[data-role="k"] .lbl', kPreview(lastEth));
