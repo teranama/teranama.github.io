@@ -151,6 +151,10 @@ window.addEventListener('resize', fit);
   
 </div>
 
+  <!-- Preview labels overlay container (inside #stage to follow scaling) -->
+  <div id="previewLabels" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></div>
+
+
   <textarea id="output" class="overlay" style="top:188px; left:14%; height:220px;"></textarea>
   <div class="overlay" style="bottom:160px; left:50%; transform:translateX(-50%); display:flex; gap:20px;">
     
@@ -419,13 +423,13 @@ const kb = document.getElementById('bgwrap');
 const keyPos = {
   // 1행
   KeyQ:{x:309,y:476}, KeyW:{x:356,y:476}, KeyE:{x:402,y:476}, KeyR:{x:448,y:476},
-  KeyT:{x:494,y:476}, KeyY:{x:561,y:476}, KeyU:{x:607,y:476}, KeyI:{x:652,y:476}, KeyO:{x:698,y:476},
+  KeyT:{x:494,y:476}, KeyY:{x:561,y:476}, KeyU:{x:607,y:476}, KeyI:{x:653,y:476}, KeyO:{x:700,y:476},
   // 2행
   KeyA:{x:320,y:512}, KeyS:{x:367,y:512}, KeyD:{x:413,y:512}, KeyF:{x:460,y:512},
-  KeyG:{x:506,y:512}, KeyH:{x:572,y:512}, KeyJ:{x:618,y:512}, KeyK:{x:664,y:512}, KeyL:{x:709,y:512},
+  KeyG:{x:506,y:512}, KeyH:{x:572,y:512}, KeyJ:{x:618,y:512}, KeyK:{x:665,y:512}, KeyL:{x:711,y:512},
   // 3행
   KeyZ:{x:345,y:549}, KeyX:{x:392,y:549}, KeyC:{x:438,y:549}, KeyV:{x:484,y:549},
-  KeyB:{x:529,y:549}, KeyN:{x:595,y:549}, KeyM:{x:641,y:549},
+  KeyB:{x:529,y:549}, KeyN:{x:596,y:549}, KeyM:{x:643,y:549},
 };
 
 function flashAt(x,y){
@@ -444,6 +448,101 @@ window.addEventListener('keydown', e=>{
   if(!pos) return;
   flashAt(pos.x, pos.y);
 }, true);
+
+// ===== Preview labels with Abyssinica SIL font + NEXT adjusted =====
+(function(){
+  const style = document.createElement('style');
+  style.textContent = `
+    #previewLabels div{
+      font-family:"Abyssinica SIL","Noto Sans Ethiopic",system-ui,-apple-system,Arial,sans-serif !important;
+      font-weight:400 !important;
+    }
+    #preview-NEXT{ position:absolute; transform:translate(-80%,-40%) !important; font-size:22px !important; }
+    #preview-NEXT.default::after{
+      content:''; position:absolute;
+      width:12px; height:12px; border-radius:50%;
+      border:2px dotted #999;
+      top:0px; right:-12px;
+    }`;
+  document.head.appendChild(style);
+
+  const out=document.getElementById('output');
+  function getText(){ return out.classList.contains('placeholder') ? '' : out.value; }
+
+  const keyPos={
+    KeyU:{x:607,y:476}, KeyI:{x:653,y:476}, KeyO:{x:700,y:476},
+    KeyJ:{x:618,y:512}, KeyK:{x:665,y:512}, KeyL:{x:711,y:512},
+    KeyM:{x:643,y:549}
+  };
+  const defaults={KeyU:'ኡ',KeyI:'ኢ',KeyO:'ኦ',KeyJ:'ኣ',KeyK:'እዉ',KeyL:'ኤ',KeyM:'⬈'};
+  const idMap={KeyU:'preview-U',KeyI:'preview-I',KeyO:'preview-O',KeyJ:'preview-J',KeyK:'preview-K',KeyL:'preview-L',KeyM:'preview-NEXT'};
+  const container=document.getElementById('previewLabels');
+  for(const code in keyPos){
+    const {x,y}=keyPos[code];
+    const div=document.createElement('div');
+    div.id=idMap[code];
+    div.style.position='absolute';
+    div.style.left=x+'px'; div.style.top=y+'px';
+    div.style.transform='translate(-50%,-50%)';
+    div.style.fontSize='22px'; div.style.color='#999';
+    div.style.zIndex=9999;
+    div.textContent=defaults[code];
+    if(code==='KeyM') div.classList.add('default');
+    container.appendChild(div);
+  }
+
+  const VOWEL_INDEX={U:1,I:2,J:3,L:4,O:6};
+  const wSeriesBaseMap=new Map(Object.entries({"ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"}));
+  const wBaseSet=new Set([...wSeriesBaseMap.values()]);
+  const layoutGroups={Q:["ገ","ጘ"],W:["ወ","ፀ"],E:["የ","ጸ"],R:["አ","ጰ"],T:["ቀ","ቐ"],Y:["ዘ","ዠ"],
+    A:["ተ","ፐ"],S:["ረ","ፈ"],D:["ነ","ኘ"],F:["መ","ሐ"],G:["ከ","ኸ"],H:["ጠ","ጨ"],Z:["ደ","ጀ"],X:["ሰ","ሸ"],C:["ለ","ኀ"],V:["በ","ቨ"],B:["ሀ","ሠ"],N:["ቸ","ዐ"]};
+  const baseToGroup=new Map();for(const arr of Object.values(layoutGroups))for(const ch of arr)baseToGroup.set(ch,arr);
+  const isEth=cp=>cp>=0x1200&&cp<=0x137F;const baseOf=cp=>cp-(cp%8);
+  function lastEth(){const t=getText();const arr=Array.from(t);for(let i=arr.length-1;i>=0;i--){const cp=arr[i].codePointAt(0);if(isEth(cp))return arr[i];}return null;}
+  function endsWS(){return /\s$/.test(getText());}
+  function nextOf(ch){const cp=ch.codePointAt(0);const base=baseOf(cp);const order=cp-base;const baseChar=String.fromCodePoint(base);const group=baseToGroup.get(baseChar);if(!group)return null;const idx=group.indexOf(baseChar);const nextBaseChar=group[(idx+1)%group.length];const nextBase=nextBaseChar.codePointAt(0);if(order===7){const wBase=wSeriesBaseMap.get(nextBaseChar);return wBase?wBase:String.fromCodePoint(nextBase+7);}return String.fromCodePoint(nextBase+order);}
+  function vowelPreview(ch,key){let ord=VOWEL_INDEX[key];const cp=ch.codePointAt(0);const base=baseOf(cp);const order=cp-base;const baseChar=String.fromCodePoint(base);const inW=(order===7)||wBaseSet.has(baseChar);if(inW&&key==='O')ord=5;return String.fromCodePoint(base+ord);}
+  function kPreview(ch){const cp=ch.codePointAt(0);const base=baseOf(cp);const baseChar=String.fromCodePoint(base);const first=String.fromCodePoint(base+5);const wBase=wSeriesBaseMap.get(baseChar);const second=wBase?wBase:String.fromCodePoint(base+7);return first+second;}
+
+  function setLabel(id,text,color,opts){
+    const el=document.getElementById(id); if(!el) return;
+    el.textContent=text; el.style.color=color;
+    if(id==='preview-NEXT'){
+      if(opts && opts.defaultState) el.classList.add('default');
+      else el.classList.remove('default');
+    }
+  }
+
+  function resetPrev(){
+    setLabel('preview-U','ኡ','#999');
+    setLabel('preview-I','ኢ','#999');
+    setLabel('preview-O','ኦ','#999');
+    setLabel('preview-J','ኣ','#999');
+    setLabel('preview-K','እዉ','#999');
+    setLabel('preview-L','ኤ','#999');
+    setLabel('preview-NEXT','⬈','#999',{defaultState:true});
+  }
+  function updatePrev(){
+    const last=lastEth();
+    if(!last||endsWS()){ resetPrev(); return; }
+    setLabel('preview-U',vowelPreview(last,'U'),'#1a73e8');
+    setLabel('preview-I',vowelPreview(last,'I'),'#1a73e8');
+    setLabel('preview-O',vowelPreview(last,'O'),'#1a73e8');
+    setLabel('preview-J',vowelPreview(last,'J'),'#1a73e8');
+    setLabel('preview-L',vowelPreview(last,'L'),'#1a73e8');
+    setLabel('preview-K',kPreview(last),'#1a73e8');
+    setLabel('preview-NEXT',nextOf(last)||'⬈','#1a73e8',{defaultState:false});
+  }
+
+  window.__updatePrev=updatePrev;
+  window.addEventListener('load',resetPrev);
+  function wrap(name){
+    const orig=window[name]; if(typeof orig!=='function') return;
+    window[name]=function(...args){const ret=orig.apply(this,args); try{window.__updatePrev();}catch(_){ } return ret;};
+  }
+  ['onKeyPressLetter','onVowelKey','onKPress','applyVowelIndex','nextTransform','insert','backspace','space','newline'].forEach(wrap);
+  document.addEventListener('keydown',()=>setTimeout(()=>{try{window.__updatePrev();}catch(_){ }},0),true);
+})();
 </script>
 </body>
 </html>
