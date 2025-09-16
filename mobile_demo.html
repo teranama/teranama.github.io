@@ -109,6 +109,20 @@
   font-weight: 400 !important;
 }
 
+/* 확장키 우상단 점선 원 */
+.key[data-role="next"] { position: relative; }
+.key[data-role="next"] .hint-circle {
+  position: absolute;
+  top: 22%;
+  right: 30%;
+  font-size: 24px;
+  font-weight: 700;
+  color: #999;
+  pointer-events: none;
+  display: block;   /* 기본 상태에서 보이게 */
+}
+
+
 </style>
 
 </head>
@@ -168,7 +182,7 @@
       <button class="key noLabel"><span class="lbl">ሀሠ</span></button>
       <button class="key noLabel"><span class="lbl">ቸዐ</span></button>
       <div class="doubleSlot">
-        <button class="key vowel ghost" data-role="next"><span class="lbl"></span></button>
+        <button class="key vowel ghost" data-role="next"><span class="lbl"></span><span class="hint-circle">◌</span></button>		
         <button class="key ghost" data-role="backspace"><span class="lbl"></span></button>
       </div>
     </div>
@@ -413,6 +427,9 @@ kb.addEventListener('click',(e)=>{
       const el = kb.querySelector(sel);
       if(el) el.style.color = '#999';
     });
+	const h = kb.querySelector('[data-role="next"] .hint-circle');
+	if(h) h.style.display = 'block';
+
   }
 
   function updatePreviews(){
@@ -435,6 +452,9 @@ kb.addEventListener('click',(e)=>{
     const el = kb.querySelector(`[data-vowel="${key}"] .lbl`);
     if(el) el.style.color = '#1a73e8';
     });
+	const h = kb.querySelector('[data-role="next"] .hint-circle');
+	if(h) h.style.display = 'none';
+
   }
 
   // updates after any click and on load
