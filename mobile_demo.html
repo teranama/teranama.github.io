@@ -68,13 +68,23 @@
 .key[data-role="k"] .lbl{  font-weight: 400 !important;  font-size: var(--vowel-size, 26px) !important;  transform: translate(var(--vowel-x,0), 5px) !important;  /* removed letter-spacing to match others */}
 
 /* 다음키는 축소 없이 풀 사이즈 */
+/* [교체] 기존 .key[data-role="next"] .lbl 블록 전체 교체 */
 .key[data-role="next"] .lbl{
   font-weight: 400 !important;
-  font-size: var(--vowel-size, 72px) !important;
+  font-size: 26px !important; /* 기본: 실제 글자 크기 */
   transform: translate(var(--next-x, -16.7%), var(--next-y, 16px)) !important;
   display: inline-block !important;
   font-family: "Abyssinica SIL","Noto Sans Ethiopic",system-ui,-apple-system,Arial,sans-serif !important;
+  text-shadow: none; /* 기본은 가짜 볼드 해제 */
 }
+
+/* ⟳ 아이콘일 때만 크게 + 가짜 볼드 보정 */
+.key[data-role="next"] .lbl.icon{
+  font-size: 64px !important; /* 모바일에서 작아보이는 문제 보정 */
+  text-shadow: 0.5px 0 currentColor, -0.5px 0 currentColor,
+               0 0.5px currentColor,  0 -0.5px currentColor;
+}
+
 
 /* 모든 라벨 기본은 얇게 (이걸 기반으로 모음/다음만 볼드) */
 .lbl{
@@ -120,9 +130,6 @@
 }
 
 .key[data-role="next"] .lbl { --next-x: -15%; }
-.key[data-role="next"] .lbl{ font-size: 26px !important; }
-
-
 
 </style>
 
@@ -504,7 +511,15 @@ function updatePreviews(){
     const setText = (sel, s)=>{ const el = kb.querySelector(sel); if (el) el.textContent = s; };
     const setColor = (sel, c)=>{ const el = kb.querySelector(sel); if (el) el.style.color = c; };
     setText('[data-role="next"] .lbl', targets.next.text); setColor('[data-role="next"] .lbl', targets.next.color);
-    const hint = kb.querySelector('[data-role="next"] .hint-circle'); if (hint) hint.style.display = targets.next.hint ? 'block' : 'none';
+    { // ⟳일 때만 아이콘 클래스 부여
+  const el = kb.querySelector('[data-role="next"] .lbl');
+  if (el){
+    if (targets.next.text === '⟳'){ el.classList.add('icon'); }
+    else { el.classList.remove('icon'); }
+  }
+}
+
+	const hint = kb.querySelector('[data-role="next"] .hint-circle'); if (hint) hint.style.display = targets.next.hint ? 'block' : 'none';
     setText('[data-role="k"] .lbl', targets.K.text); setColor('[data-role="k"] .lbl', targets.K.color);
     ['U','I','O','J','L'].forEach(k => {
       setText(`[data-vowel="${k}"] .lbl`, targets[k].text);
@@ -773,7 +788,15 @@ function updatePreviews(){
     setText('[data-role="next"] .lbl', tg.next.text);
     { const el = kb.querySelector('[data-role="next"] .lbl'); if (el) el.style.color = tg.next.color || '#999'; }
     const hint = kb.querySelector('[data-role="next"] .hint-circle'); if (hint) hint.style.display = tg.next.hint ? 'block' : 'none';
-    const wh = kb.querySelector('[data-role=\"next\"] .w-hint'); if (wh) wh.style.display = tg.next.hint ? 'block' : 'none';
+{ // ⟳일 때만 아이콘 클래스 부여
+  const el = kb.querySelector('[data-role="next"] .lbl');
+  if (el){
+    if (tg.next.text === '⟳'){ el.classList.add('icon'); }
+    else { el.classList.remove('icon'); }
+  }
+}
+    
+	const wh = kb.querySelector('[data-role=\"next\"] .w-hint'); if (wh) wh.style.display = tg.next.hint ? 'block' : 'none';
     setText('[data-role="k"] .lbl', tg.K.text);
     { const el = kb.querySelector('[data-role="k"] .lbl'); if (el) el.style.color = tg.K.color || '#999'; }
     ['U','I','O','J','L'].forEach(k => { setText(`[data-vowel="${k}"] .lbl`, tg[k].text); { const el = kb.querySelector(`[data-vowel=\"${k}\"] .lbl`); if (el) el.style.color = (tg.isIdle ? '#999' : '#1a73e8'); }if (tg[k].text) setColor(`[data-vowel="${k}"] .lbl`, tg[k].color); });
