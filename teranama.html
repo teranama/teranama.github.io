@@ -108,6 +108,19 @@ window.addEventListener('resize', fit);
       transform:translate(-50%,-50%);
       pointer-events:none;
     }
+	#preview-NEXT.default::after {
+  content: none !important;
+  border: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+#preview-NEXT {
+  font-size: 22px;
+  text-shadow: 0.5px 0 currentColor, -0.5px 0 currentColor,
+               0 0.5px currentColor, 0 -0.5px currentColor;
+}
+
+
   </style>
 </head>
 <body>
@@ -423,10 +436,10 @@ const kb = document.getElementById('bgwrap');
 const keyPos = {
   // 1행
   KeyQ:{x:309,y:474}, KeyW:{x:356,y:474}, KeyE:{x:402,y:474}, KeyR:{x:448,y:474},
-  KeyT:{x:495,y:474}, KeyY:{x:561,y:474}, KeyU:{x:607,y:474}, KeyI:{x:653,y:474}, KeyO:{x:700,y:474},
+  KeyT:{x:495,y:474}, KeyY:{x:562,y:474}, KeyU:{x:608,y:474}, KeyI:{x:654,y:474}, KeyO:{x:701,y:474},
   // 2행
   KeyA:{x:320,y:512}, KeyS:{x:367,y:512}, KeyD:{x:413,y:512}, KeyF:{x:460,y:512},
-  KeyG:{x:506,y:512}, KeyH:{x:573,y:512}, KeyJ:{x:619,y:512}, KeyK:{x:666,y:512}, KeyL:{x:712,y:512},
+  KeyG:{x:506,y:512}, KeyH:{x:573,y:512}, KeyJ:{x:619,y:512}, KeyK:{x:666,y:512}, KeyL:{x:713,y:512},
   // 3행
   KeyZ:{x:345,y:549}, KeyX:{x:392,y:549}, KeyC:{x:438,y:549}, KeyV:{x:484,y:549},
   KeyB:{x:530,y:549}, KeyN:{x:597,y:549}, KeyM:{x:644,y:549},
@@ -457,7 +470,7 @@ window.addEventListener('keydown', e=>{
       font-family:"Abyssinica SIL","Noto Sans Ethiopic",system-ui,-apple-system,Arial,sans-serif !important;
       font-weight:400 !important;
     }
-    #preview-NEXT{ position:absolute; transform:translate(-50%,-40%) !important; font-size:22px !important; }
+    #preview-NEXT{ position:absolute; transform:translate(-40%,-45%) !important; font-size:22px !important; font-weight:700;}
     #preview-NEXT.default::after{
       content:''; position:absolute;
       width:12px; height:12px; border-radius:50%;
@@ -474,7 +487,7 @@ window.addEventListener('keydown', e=>{
     KeyJ:{x:618,y:512}, KeyK:{x:665,y:512}, KeyL:{x:711,y:512},
     KeyM:{x:643,y:549}
   };
-  const defaults={KeyU:'ኡ',KeyI:'ኢ',KeyO:'ኦ',KeyJ:'ኣ',KeyK:'እ',KeyL:'ኤ',KeyM:'⬈'};
+  const defaults={KeyU:'ኡ',KeyI:'ኢ',KeyO:'ኦ',KeyJ:'ኣ',KeyK:'እ',KeyL:'ኤ',KeyM:'⟳'};
   const idMap={KeyU:'preview-U',KeyI:'preview-I',KeyO:'preview-O',KeyJ:'preview-J',KeyK:'preview-K',KeyL:'preview-L',KeyM:'preview-NEXT'};
   const container=document.getElementById('previewLabels');
   for(const code in keyPos){
@@ -520,7 +533,7 @@ window.addEventListener('keydown', e=>{
     setLabel('preview-J','ኣ','#999');
     setLabel('preview-K','እ','#999');
     setLabel('preview-L','ኤ','#999');
-    setLabel('preview-NEXT','⬈','#999',{defaultState:true});
+    setLabel('preview-NEXT','⟳','#999',{defaultState:true});
   }
   function updatePrev(){
     const last=lastEth();
@@ -531,7 +544,7 @@ window.addEventListener('keydown', e=>{
     setLabel('preview-J',vowelPreview(last,'J'),'#1a73e8');
     setLabel('preview-L',vowelPreview(last,'L'),'#1a73e8');
     setLabel('preview-K',kPreview(last),'#1a73e8');
-    setLabel('preview-NEXT',nextOf(last)||'⬈','#1a73e8',{defaultState:false});
+    setLabel('preview-NEXT',nextOf(last)||'⟳','#1a73e8',{defaultState:false});
   }
 
   window.__updatePrev=updatePrev;
@@ -617,10 +630,10 @@ window.addEventListener('keydown', e=>{
       function kPreview(ch){ const cp=ch.codePointAt(0); const base=baseOf(cp); return String.fromCodePoint(base+5); }
       function expandPreview(ch){
         const cp=ch.codePointAt(0), base=baseOf(cp), order=cp-base;
-        if(order!==0) return '⬈';
+        if(order!==0) return '⟳';
         const baseChar=String.fromCodePoint(base);
         const baseCharRoot=(window.wSeriesRev&&wSeriesRev.get(baseChar))||baseChar;
-        const group=baseToGroup.get(baseCharRoot); if(!group||group.length<2) return '⬈';
+        const group=baseToGroup.get(baseCharRoot); if(!group||group.length<2) return '⟳';
         const baseRoot=group[0], subRoot=group[1];
         const stages=[ subRoot.codePointAt(0), wOf(baseRoot).codePointAt(0), wOf(subRoot).codePointAt(0) ];
         const idx=stages.indexOf(cp);
@@ -648,7 +661,7 @@ window.addEventListener('keydown', e=>{
             setLabel('preview-J','ኣ','#999');
             setLabel('preview-L','ኤ','#999');
             setLabel('preview-K','እ','#999');
-            setLabel('preview-NEXT','⬈','#999',{defaultState:true});
+            setLabel('preview-NEXT','⟳','#999',{defaultState:true});
           }else{
             // reuse vowelPreview from original if present; else approximate via base+index
             const baseOf=cp=>cp-(cp%8);
@@ -660,7 +673,7 @@ window.addEventListener('keydown', e=>{
             setLabel('preview-J',vowelIdx(lastEth,3),'#1a73e8');
             setLabel('preview-L',vowelIdx(lastEth,4),'#1a73e8');
             setLabel('preview-K',vowel5(lastEth),'#1a73e8');
-            setLabel('preview-NEXT',expandPreview(lastEth)||'⬈','#1a73e8',{defaultState:false});
+            setLabel('preview-NEXT',expandPreview(lastEth)||'⟳','#1a73e8',{defaultState:false});
           }
         }catch(e){
           _orig_updatePrev();
@@ -917,7 +930,7 @@ window.addEventListener('keydown', e=>{
 </script>
 
 
-<!-- === NEXT preview final rule: default '⬈ዉ' gray; active shows next cycle; vowels -> inactive === -->
+<!-- === NEXT preview final rule: default '⟳' gray; active shows next cycle; vowels -> inactive === -->
 <script>
 (function(){
   try{
@@ -974,13 +987,13 @@ window.addEventListener('keydown', e=>{
 
     function setNextInactive(){
       const el = document.getElementById('preview-NEXT'); if(!el) return;
-      el.textContent = '⬈ዉ';
+      el.textContent = '⟳';
       el.style.color = '#999';
       el.classList.add('default');
     }
     function setNextActive(char){
       const el = document.getElementById('preview-NEXT'); if(!el) return;
-      el.textContent = char || '⬈';
+      el.textContent = char || '⟳';
       el.style.color = '#1a73e8';
       el.classList.remove('default');
     }
