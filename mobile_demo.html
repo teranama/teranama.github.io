@@ -26,7 +26,6 @@
     --next-x: -55%;        /* 다음키 X 오프셋(윗줄 7번째 칸과 정렬) */
     --next-y: 7px;           /* 다음키 Y 오프셋 */
   }
-
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{margin:0;background:transparent;font-family:"Noto Sans Ethiopic",system-ui,-apple-system,Arial,sans-serif;height:100vh;display:flex;flex-direction:column}
 
@@ -55,6 +54,7 @@
 
   /* 기본 라벨은 가볍게 — 모음/다음에서 덮어씀 */
   .lbl{ font-weight:400 !important; font-size:26px !important; line-height:1; color:#000; pointer-events:none }
+  
 
   .vowel .lbl{}
   .ghost .lbl{ display:none }
@@ -65,12 +65,7 @@
   /* ===== 모음/다음 굵기·크기·정렬 패치 ===== */
 
 /* K(두 글자)만 축소 */
-.key[data-role="k"] .lbl{
-  font-weight: 400 !important;
-  font-size: calc(var(--vowel-size, 26px) * 0.88) !important;
-  transform: translate(var(--vowel-x,0), 5px) !important;
-  letter-spacing: 0.2px;
-}
+.key[data-role="k"] .lbl{  font-weight: 400 !important;  font-size: var(--vowel-size, 26px) !important;  transform: translate(var(--vowel-x,0), 5px) !important;  /* removed letter-spacing to match others */}
 
 /* 다음키는 축소 없이 풀 사이즈 */
 .key[data-role="next"] .lbl{
@@ -111,6 +106,7 @@
 }
 
 /* 확장키 우상단 점선 원 */
+.key[data-role="next"] .w-hint{position:absolute; right:18%; top:50%; transform:translateY(-50%); font-size:18px; color:#999; pointer-events:none;}
 .key[data-role="next"] { position: relative; }
 .key[data-role="next"] .hint-circle {
   position: absolute;
@@ -138,8 +134,8 @@
       <div style="padding:14px 16px;font-size:14px;line-height:1.6">
         <ul style="margin:0;padding-left:18px">
           <li>በአንድ ቁልፍ ላይ ያሉትን የኋላ ፊደሎች ለመጻፍ መጀመሪያ ያንን ቁልፍ ከዚያም የቀጣዩን መስፋፊያ (⬈) ይጫኑ።</li>
-          <li>ሰማያዊ የተለዩ የሞል ቁልፎች ብቻቸውን አይገቡም። መጀመሪያ ሥር ያለውን አ ይጫኑ።</li>
-          <li>በሞል ቁልፍ ላይ ያለው ዉ ለመጻፍ ያንኑ ቁልፍ በተከታታይ ሁለት ጊዜ ይጫኑ።</li>
+          <li>መስፋፊያውን በተከታታይ ሁለት ጊዜ ካስጫኑ ዉ ይጻፋል።</li>
+          <li>ግራጫ ቀለም ያላቸው የሞል ቁልፎች ብቻቸውን አይገቡም። መጀመሪያ ሥር ያለውን አ (አ) ይጫኑ።</li>
         </ul>
       </div>
     </div>
@@ -170,7 +166,7 @@
       <button class="key noLabel"><span class="lbl">ከኸ</span></button>
       <button class="key noLabel"><span class="lbl">ጠጨ</span></button>
       <button class="key vowel" data-vowel="J"><span class="lbl">ኣ</span></button>
-      <button class="key vowel" data-role="k"><span class="lbl">እዉ</span></button>
+      <button class="key vowel" data-role="k"><span class="lbl">እ</span></button>
       <button class="key vowel" data-vowel="L"><span class="lbl">ኤ</span></button>
     </div>
 
@@ -183,7 +179,7 @@
       <button class="key noLabel"><span class="lbl">ሀሠ</span></button>
       <button class="key noLabel"><span class="lbl">ቸዐ</span></button>
       <div class="doubleSlot">
-        <button class="key vowel ghost" data-role="next"><span class="lbl"></span><span class="hint-circle">◌</span></button>		
+        <button class="key vowel ghost" data-role="next"><span class="lbl"></span><span class="w-hint">ዉ</span><span class="hint-circle">◌</span></button>		
         <button class="key ghost" data-role="backspace"><span class="lbl"></span></button>
       </div>
     </div>
@@ -211,7 +207,7 @@ const getSeriesBase = (cp) => cp - (cp % 8);
 const isEthiopic = (cp) => (cp >= 0x1200 && cp <= 0x137F);
 
 /* 모음 인덱스 (PC와 동일) */
-const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6 };
+const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6, K:5 };
 
 /* w-series base */
 const wSeriesBaseMap = new Map(Object.entries({
@@ -248,21 +244,58 @@ function onVowelKey(k){
 
 /* K: 첫 K → 5형(ə), 두 번째 K → w-series 진입(가능하면), 이미 w-series면 베이스로 */
 function onKPress(){
-  const prev = getText(); if (!prev) return;
+  // PC=모바일: K는 5형(ə) 적용만
+  onVowelKey('K');
+}
+
+
+/* PC와 동일한 onExpandPress: 4-스테이지 순환 */
+function onExpandPress(){
+
+  const prev = getText(); if(!prev) return;
   const chars = Array.from(prev); const i = chars.length-1;
   const cp = chars[i].codePointAt(0); if(!isEthiopic(cp)) return;
 
-  let base = getSeriesBase(cp);
-  let order = cp - base;
-  let baseChar = String.fromCodePoint(base);
+  const base = getSeriesBase(cp);
+  const order = cp - base;
+  const baseChar = String.fromCodePoint(base);
 
-  if (wBaseSet.has(baseChar) || order === 7){
-    const wBaseChar = wBaseSet.has(baseChar) ? baseChar : wSeriesBaseMap.get(baseChar);
-    if (wBaseChar){ chars[i] = wBaseChar; setText(chars.join("")); return; }
+  // canonical W → root 역매핑
+  const wSeriesRev = new Map(Array.from(wSeriesBaseMap.entries()).map(([k,v])=>[v,k]));
+  const rootChar = wSeriesRev.get(baseChar) || baseChar;
+
+  const group = baseToGroup.get(rootChar);
+  if(!group || group.length<2) return;
+
+  const root = group[0], sub = group[1];
+  const wBaseOf = (ch)=>{ const mapped=wSeriesBaseMap.get(ch); return mapped?mapped.codePointAt(0):(ch.codePointAt(0)+7); };
+
+  const cpBase  = root.codePointAt(0);
+  const cpSub   = sub.codePointAt(0);
+  const cpBaseW = wBaseOf(root);
+  const cpSubW  = wBaseOf(sub);
+
+  const anchors=[cpSub,cpBaseW,cpSubW,cpBase]; // 1→2→3→0
+  if (anchors.includes(cp)){
+    const idx=anchors.indexOf(cp);
+    const next=anchors[(idx+1)%anchors.length];
+    chars[i]=String.fromCodePoint(next);
+    setText(chars.join(""));
+    return;
   }
-  if (order !== 5){ chars[i] = String.fromCodePoint(base + 5); }
-  else { const wBaseChar = wSeriesBaseMap.get(baseChar); chars[i] = wBaseChar ? wBaseChar : String.fromCodePoint(base + 7); }
+
+  // fallback: 모음 index/order & w-status 유지한 채 root만 교대
+  const idx = group.indexOf(rootChar);
+  const nextBaseChar = group[(idx+1)%group.length];
+  const nextBase = nextBaseChar.codePointAt(0);
+  if (order === 7){
+    const wBase = wSeriesBaseMap.get(nextBaseChar);
+    chars[i] = wBase ? wBase : String.fromCodePoint(nextBase + 7);
+  } else {
+    chars[i] = String.fromCodePoint(nextBase + order);
+  }
   setText(chars.join(""));
+
 }
 
 /* next: 모음/wa 유지 */
@@ -309,7 +342,7 @@ kb.addEventListener('click',(e)=>{
   const btn = e.target.closest('.key'); if(!btn) return;
   const role = btn.dataset.role;
   if (role === 'backspace') return; // pointerdown에서 처리됨(중복 방지)
-  if (role === 'next'){ nextTransform(); return; }
+  if (role === 'next'){ onExpandPress(); return; }
   if (role === 'space'){ space(); return; }
   if (role === 'enter'){ newline(); return; }
   if (role === 'k'){ onKPress(); return; }
@@ -325,28 +358,96 @@ kb.addEventListener('click',(e)=>{
 </script>
 
 
+
 <script>
+// ===== PREVIEW MODULE (self-contained, no overlap) =====
 (function(){
   const out = document.getElementById('editor');
   const kb  = document.getElementById('kb');
+  if(!out || !kb) return;
 
-  const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6 };
+  // Local helpers (do not rely on outer closures)
+  const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6, K:5 };
+  const isEth = (cp)=> cp>=0x1200 && cp<=0x137F;
+  const baseOf = (cp)=> cp - (cp % 8);
+
+  // w-series maps (canonical W roots)
   const wSeriesBaseMap = new Map(Object.entries({
     "ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"
   }));
   const wBaseSet = new Set([...wSeriesBaseMap.values()]);
 
+  // NEXT groups (same layout as engine)
   const layoutGroups = {
     Q: ["ገ", "ጘ"], W: ["ወ","ፀ"], E: ["የ","ጸ"], R: ["አ","ጰ"], T: ["ቀ","ቐ"], Y: ["ዘ","ዠ"],
-  A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
-  Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ","ኀ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ","ዐ"]
+    A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
+    Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ","ኀ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ","ዐ"]
   };
-  const baseToGroup = new Map(); for(const arr of Object.values(layoutGroups)) for(const ch of arr) baseToGroup.set(ch, arr);
+  const baseToGroup = new Map(); for (const arr of Object.values(layoutGroups)) for (const ch of arr) baseToGroup.set(ch, arr);
 
-  const isEth = cp => cp>=0x1200 && cp<=0x137F;
-  const baseOf = cp => cp - (cp % 8);
+  // Utility: find last Ethiopic char in editor
+  function last(){
+    const t = out.textContent || "እ";
+    const arr = Array.from(t);
+    for (let i=arr.length-1; i>=0; i--){
+      const cp = arr[i].codePointAt(0);
+      if (isEth(cp)) return arr[i];
+    }
+    return null;
+  }
+  const endsWS = ()=> /\s$/.test(out.textContent||"");
 
-  // capture defaults once so we can reset
+  // Compute NEXT preview character per 4-stage cycle (anchors only); else null (inactive)
+  function nextCycleChar(ch){
+    const cp = ch.codePointAt(0);
+    const base = baseOf(cp);
+    const baseChar = String.fromCodePoint(base);
+
+    // reverse canonical W base back to its root for grouping
+    const wSeriesRev = new Map(Array.from(wSeriesBaseMap.entries()).map(([k,v])=>[v,k]));
+    const rootChar = wSeriesRev.get(baseChar) || baseChar;
+
+    const group = baseToGroup.get(rootChar); if(!group || group.length<2) return null;
+    const root = group[0], sub = group[1];
+
+    const cpBase  = root.codePointAt(0);
+    const cpSub   = sub.codePointAt(0);
+    const cpBaseW = (wSeriesBaseMap.get(root) || String.fromCodePoint(cpBase + 7)).codePointAt(0);
+    const cpSubW  = (wSeriesBaseMap.get(sub ) || String.fromCodePoint(cpSub  + 7)).codePointAt(0);
+    const anchors = [cpSub, cpBaseW, cpSubW, cpBase]; // 1 → 2 → 3 → 0
+
+    if (!anchors.includes(cp)) return null;
+    const idx = anchors.indexOf(cp);
+    const next = anchors[(idx+1)%anchors.length];
+    return String.fromCodePoint(next);
+  }
+
+  function setText(sel, s){
+    const el = kb.querySelector(sel);
+    if (el) el.textContent = s;
+  }
+  function setColor(sel, c){
+    const el = kb.querySelector(sel);
+    if (el) el.style.color = c;
+  }
+
+  // Vowel/K preview calculators
+  function vowelPreview(ch, key){
+    let ord = VOWEL_INDEX[key];
+    const cp = ch.codePointAt(0);
+    const base = baseOf(cp);
+    const order = cp - base;
+    const baseChar = String.fromCodePoint(base);
+    const inW = (order===7) || wBaseSet.has(baseChar);
+    if (inW && key==='O') ord = 5; // w+O => ə
+    return String.fromCodePoint(base + ord);
+  }
+  function kPreview(ch){
+    const base = baseOf(ch.codePointAt(0));
+    return String.fromCodePoint(base + 5); // single ə preview
+  }
+
+  // Defaults cache (to reset when no target)
   const defaults = {};
   function cacheDefault(sel, fallback){
     const el = kb.querySelector(sel);
@@ -357,130 +458,575 @@ kb.addEventListener('click',(e)=>{
   cacheDefault('[data-role="k"] .lbl', 'K');
   ['U','I','O','J','L'].forEach(ch => cacheDefault(`[data-vowel="${ch}"] .lbl`, ch));
 
-  function lastEthiopicChar(){
-    const t = out.textContent || "";
-    const arr = Array.from(t);
-    for(let i=arr.length-1;i>=0;i--){
-      const cp = arr[i].codePointAt(0);
-      if(isEth(cp)) return arr[i];
+  function resetPreviewsToDefault(){
+    setText('[data-role="next"] .lbl', '⬈'); setColor('[data-role="next"] .lbl', '#999');
+    setText('[data-role="k"] .lbl', defaults['[data-role="k"] .lbl'] || 'K'); setColor('[data-role="k"] .lbl', '#999');
+    ['U','I','O','J','L'].forEach(k => { setText(`[data-vowel="${k}"] .lbl`, defaults[`[data-vowel="${k}"] .lbl`] || k); setColor(`[data-vowel="${k}"] .lbl`, '#999'); });
+    const h = kb.querySelector('[data-role="next"] .hint-circle'); if (h) h.style.display = 'block';
+  }
+
+  
+function updatePreviews(){
+  const kb = document.getElementById('kb');
+  const out = document.getElementById('editor');
+  if(!kb || !out) return;
+
+  const isEth = (cp)=> cp>=0x1200 && cp<=0x137F;
+  const baseOf = (cp)=> cp - (cp % 8);
+  const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6, K:5 };
+  const wSeriesBaseMap = new Map(Object.entries({"ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"}));
+  const wBaseSet = new Set([...wSeriesBaseMap.values()]);
+
+  const t = out.textContent || "እ";
+  const arr = Array.from(t);
+  let ch = null;
+  for (let i=arr.length-1;i>=0;i--){
+    const cp = arr[i].codePointAt(0);
+    if (isEth(cp)){ ch = arr[i]; break; }
+  }
+  const endsWS = /\s$/.test(t);
+
+  const targets = {
+    next: { text: "⬈", color: "#999", hint: true },
+    K: { text: "K", color: "#999" },
+    U: { text: "U", color: "#999" },
+    I: { text: "I", color: "#999" },
+    O: { text: "O", color: "#999" },
+    J: { text: "J", color: "#999" },
+    L: { text: "L", color: "#999" }
+  };
+
+  if (!ch || endsWS){
+    const setText = (sel, s)=>{ const el = kb.querySelector(sel); if (el) el.textContent = s; };
+    const setColor = (sel, c)=>{ const el = kb.querySelector(sel); if (el) el.style.color = c; };
+    setText('[data-role="next"] .lbl', targets.next.text); setColor('[data-role="next"] .lbl', targets.next.color);
+    const hint = kb.querySelector('[data-role="next"] .hint-circle'); if (hint) hint.style.display = targets.next.hint ? 'block' : 'none';
+    setText('[data-role="k"] .lbl', targets.K.text); setColor('[data-role="k"] .lbl', targets.K.color);
+    ['U','I','O','J','L'].forEach(k => {
+      setText(`[data-vowel="${k}"] .lbl`, targets[k].text);
+      setColor(`[data-vowel="${k}"] .lbl`, targets[k].color);
+    });
+    return;
+  }
+
+  const cp = ch.codePointAt(0);
+  const base = baseOf(cp);
+  const order = cp - base;
+  const baseChar = String.fromCodePoint(base);
+
+  const canonicalW = new Set(["ጐ","ቈ","ቘ","ኰ","ኈ"]);
+  const isCanonical = canonicalW.has(baseChar);
+  const inW = (order===7) || wBaseSet.has(baseChar);
+  const isSynthetic = (order===7) && !isCanonical;
+
+  (function(){
+    const layoutGroups = {
+      Q: ["ገ", "ጘ"], W: ["ወ","ፀ"], E: ["የ","ጸ"], R: ["አ","ጰ"], T: ["ቀ","ቐ"], Y: ["ዘ","ዠ"],
+      A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
+      Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ","ኀ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ","ዐ"]
+    };
+    const baseToGroup = new Map(); for (const arr of Object.values(layoutGroups)) for (const ch of arr) baseToGroup.set(ch, arr);
+    const wSeriesBaseMap = new Map(Object.entries({"ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"}));
+    const wSeriesRev = new Map(Array.from(wSeriesBaseMap.entries()).map(([k,v])=>[v,k]));
+    const rootChar = wSeriesRev.get(baseChar) || baseChar;
+    const group = baseToGroup.get(rootChar);
+    if (group && group.length>=2){
+      const root = group[0], sub = group[1];
+      const wBaseOf = (ch)=>{ const mapped=wSeriesBaseMap.get(ch); return mapped?mapped.codePointAt(0):(ch.codePointAt(0)+7); };
+      const cpBase  = root.codePointAt(0);
+      const cpSub   = sub.codePointAt(0);
+      const cpBaseW = wBaseOf(root);
+      const cpSubW  = wBaseOf(sub);
+      const anchors=[cpSub,cpBaseW,cpSubW,cpBase];
+      if (anchors.includes(cp)){
+        const idx=anchors.indexOf(cp);
+        const next=anchors[(idx+1)%anchors.length];
+        targets.next = { text: String.fromCodePoint(next), color: "#1a73e8", hint: false };
+      } else {
+        targets.next = { text: "⬈", color: "#999", hint: true };
+      }
     }
+  })();
+
+  targets.K = { text: String.fromCodePoint(base + 5), color: "#1a73e8" };
+
+  const computeVowel = (key)=>{
+    let ord = VOWEL_INDEX[key];
+    if (inW && key === 'O') ord = 5;
+    return String.fromCodePoint(base + ord);
+  };
+  const VOWELS = ['U','I','O','J','L'];
+  VOWELS.forEach(k => targets[k] = { text: computeVowel(k), color: "#1a73e8" });
+
+  if (isSynthetic){
+    VOWELS.forEach(k => targets[k].text = '');
+    targets.K.text = defaults ? defaults.K : 'እ';
+  }
+
+  const setText = (sel, s)=>{ const el = kb.querySelector(sel); if (el) el.textContent = s; };
+  const setColor = (sel, c)=>{ const el = kb.querySelector(sel); if (el) el.style.color = c; };
+
+  setText('[data-role="next"] .lbl', targets.next.text); setColor('[data-role="next"] .lbl', targets.next.color);
+  const hint = kb.querySelector('[data-role="next"] .hint-circle'); if (hint) hint.style.display = targets.next.hint ? 'block' : 'none';
+
+  setText('[data-role="k"] .lbl', targets.K.text); if (targets.K.text!=='K') setColor('[data-role="k"] .lbl', targets.K.color);
+
+  VOWELS.forEach(k => {
+    setText(`[data-vowel="${k}"] .lbl`, targets[k].text);
+    if (targets[k].text===''){
+      // blank: no color change
+    } else {
+      setColor(`[data-vowel="${k}"] .lbl`, targets[k].color);
+    }
+  });
+}
+// NEXT
+    const next = nextCycleChar(ch);
+    if (next){
+      setText('[data-role="next"] .lbl', next); setColor('[data-role="next"] .lbl', '#1a73e8');
+      const h = kb.querySelector('[data-role="next"] .hint-circle'); if (h) h.style.display = 'none';
+    }else{
+      setText('[data-role="next"] .lbl', '⬈'); setColor('[data-role="next"] .lbl', '#999');
+      const h = kb.querySelector('[data-role="next"] .hint-circle'); if (h) h.style.display = 'block';
+    }
+
+    // K (always base + 5)
+    const cp = ch.codePointAt(0); const base = baseOf(cp);
+    setText('[data-role="k"] .lbl', String.fromCodePoint(base + 5)); setColor('[data-role="k"] .lbl', '#1a73e8');
+
+    // Vowels (force set each time)
+    const VOWELS = ['U','I','O','J','L'];
+    VOWELS.forEach(k => {
+      let ord = VOWEL_INDEX[k];
+      const order = cp - base;
+      const baseChar = String.fromCodePoint(base);
+      const inW = (order===7) || wBaseSet.has(baseChar);
+      if (inW && k==='O') ord = 5; // w+O => ə
+      const glyph = String.fromCodePoint(base + ord);
+      setText(`[data-vowel="${k}"] .lbl`, glyph);
+      setColor(`[data-vowel="${k}"] .lbl`, '#1a73e8');
+    });
+
+    // Blanking rules (apply AFTER setting text)
+    const baseChar = String.fromCodePoint(base);
+    const canonicalW = new Set(["ጐ","ቈ","ቘ","ኰ","ኈ"]);
+    const isCanonical = canonicalW.has(baseChar);
+    const isSynthetic = ((cp - base)===7) && !isCanonical;
+    if (isSynthetic){
+      ['U','I','L','K','O'].forEach(k=> setText(`[data-vowel="${k}"] .lbl`, ''));
+    } else if (((cp - base)===7) || wBaseSet.has(baseChar)){
+      ['U','I','J','L'].forEach(k=> setText(`[data-vowel="${k}"] .lbl`, ''));
+    }
+    
+  }
+
+  // Wire events
+  function safeUpdate(){ try{ updatePreviews(); }catch(e){} }
+  window.addEventListener('load', safeUpdate);
+  kb.addEventListener('click', ()=> setTimeout(safeUpdate, 0));
+  kb.addEventListener('pointerdown', ()=> setTimeout(safeUpdate, 0));
+  kb.addEventListener('pointerup', ()=> setTimeout(safeUpdate, 0));
+
+  // Expose for debugging
+  window.updatePreviews = updatePreviews;
+})();
+
+
+(function(){
+  const kb = document.getElementById('kb');
+  function safe(){ try{ updatePreviews(); }catch(e){} }
+  if (kb){
+    kb.addEventListener('pointerdown', safe);
+    kb.addEventListener('pointermove', safe);
+    kb.addEventListener('pointerup',   safe);
+    kb.addEventListener('click',       ()=> setTimeout(safe,0));
+  }
+  window.addEventListener('load', safe);
+})();
+
+</script>
+
+
+<script>
+(function(){
+  const kb = document.getElementById('kb');
+  const out = document.getElementById('editor');
+  if (!kb || !out) return;
+
+  const isEth = (cp)=> cp>=0x1200 && cp<=0x137F;
+  const baseOf = (cp)=> cp - (cp % 8);
+  const VOWEL_INDEX = { U:1, I:2, J:3, L:4, O:6, K:5 };
+
+  // Canonical W series roots & bases
+  const wSeriesBaseMap = new Map(Object.entries({"ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"}));
+  const wBaseSet = new Set([...wSeriesBaseMap.values()]);
+  const canonicalW = new Set(["ጐ","ቈ","ቘ","ኰ","ኈ"]);
+
+  // Cache initial DOM labels (Ethiopic glyphs) for idle defaults
+  const defaults = {
+    next: (kb.querySelector('[data-role="next"] .lbl') || {textContent:"⬈"}).textContent || "⬈",
+    K:    (kb.querySelector('[data-role="k"] .lbl')    || {textContent:"K"}).textContent || "እ",
+    U:    (kb.querySelector('[data-vowel="U"] .lbl')   || {textContent:"U"}).textContent || "U",
+    I:    (kb.querySelector('[data-vowel="I"] .lbl')   || {textContent:"I"}).textContent || "I",
+    O:    (kb.querySelector('[data-vowel="O"] .lbl')   || {textContent:"O"}).textContent || "O",
+    J:    (kb.querySelector('[data-vowel="J"] .lbl')   || {textContent:"J"}).textContent || "J",
+    L:    (kb.querySelector('[data-vowel="L"] .lbl')   || {textContent:"L"}).textContent || "L"
+  };
+
+  // NEXT groups (anchors)
+  const layoutGroups = {
+    Q: ["ገ","ጘ"], W: ["ወ","ፀ"], E: ["የ","ጸ"], R: ["አ","ጰ"], T: ["ቀ","ቐ"], Y: ["ዘ","ዠ"],
+    A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
+    Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ","ኀ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ","ዐ"]
+  };
+  const baseToGroup = new Map(); for (const arr of Object.values(layoutGroups)) for (const c of arr) baseToGroup.set(c, arr);
+  const wRev = new Map(Array.from(wSeriesBaseMap.entries()).map(([k,v])=>[v,k]));
+
+  function lastEth(){
+    const t = out.textContent || "እ"; const arr = Array.from(t);
+    for (let i=arr.length-1;i>=0;i--){ const cp = arr[i].codePointAt(0); if (isEth(cp)) return arr[i]; }
     return null;
   }
-  function endsWithWhitespace(){
-    const t = out.textContent || "";
-    return /\s$/.test(t);
-    // this covers space/newline tabs etc. If empty string, it's false.
-  }
 
-  function nextOf(ch){
-    const cp = ch.codePointAt(0);
-    const base = baseOf(cp);
-    const order = cp - base;
-    const baseChar = String.fromCodePoint(base);
-    const group = baseToGroup.get(baseChar);
-    if(!group || group.length<2) return null;
-    const idx = group.indexOf(baseChar);
-    const nextBaseChar = group[(idx+1)%group.length];
-    const nextBase = nextBaseChar.codePointAt(0);
-    if(order===7){
-      const wBase = wSeriesBaseMap.get(nextBaseChar);
-      return wBase ? wBase : String.fromCodePoint(nextBase + 7);
+  function computeTargets(){
+    const t = out.textContent || "እ";
+    const endsWS = /\s$/.test(t);
+    const ch = lastEth();
+
+    // defaults (gray)
+    const targets = {
+      next: { text: "⬈", color: "#999", hint: true },
+      K: { text: "K", color: "#999" },
+      U: { text: "U", color: "#999" },
+      I: { text: "I", color: "#999" },
+      O: { text: "O", color: "#999" },
+      J: { text: "J", color: "#999" },
+      L: { text: "L", color: "#999" }
+    };
+    if (!ch || endsWS){
+      // paint defaults (Ethiopic) for idle, not roman placeholders
+      targets.next.text = defaults.next; targets.K.text = defaults ? defaults.K : 'እ';
+      targets.U.text = defaults.U; targets.I.text = defaults.I; targets.O.text = defaults.O;
+      targets.J.text = defaults.J; targets.L.text = defaults.L;
+      // keep them gray
+      targets.next.color = '#999'; targets.K.color = '#999';
+      targets.U.color = targets.I.color = targets.O.color = targets.J.color = targets.L.color = '#999';
+      return targets;
     }
-    return String.fromCodePoint(nextBase + order);
-  }
 
-  function vowelPreview(ch, key){
-    let ord = VOWEL_INDEX[key];
     const cp = ch.codePointAt(0);
     const base = baseOf(cp);
     const order = cp - base;
     const baseChar = String.fromCodePoint(base);
     const inW = (order===7) || wBaseSet.has(baseChar);
-    if(inW && key==='O') ord = 5; // wa+O → ə
-    return String.fromCodePoint(base + ord);
+    const isSynthetic = (order===7) && !canonicalW.has(baseChar);
+
+    // NEXT (anchors only)
+    (function(){
+      const rootChar = wRev.get(baseChar) || baseChar;
+      const group = baseToGroup.get(rootChar);
+      if (group && group.length>=2){
+        const root = group[0], sub = group[1];
+        const wBaseOf = (c)=>{ const m=wSeriesBaseMap.get(c); return m?m.codePointAt(0):(c.codePointAt(0)+7); };
+        const cpBase  = root.codePointAt(0);
+        const cpSub   = sub.codePointAt(0);
+        const cpBaseW = wBaseOf(root);
+        const cpSubW  = wBaseOf(sub);
+        const anchors=[cpSub,cpBaseW,cpSubW,cpBase];
+        if (anchors.includes(cp)){
+          const next = anchors[(anchors.indexOf(cp)+1)%anchors.length];
+          targets.next = { text: String.fromCodePoint(next), color: "#1a73e8", hint: false };
+        } else {
+          targets.next = { text: "⬈", color: "#999", hint: true };
+        }
+      }
+    })();
+
+    // K (single ə)
+    targets.K = { text: String.fromCodePoint(base + 5), color: "#1a73e8" };
+
+    // Vowels
+    const VOWELS = ['U','I','O','J','L'];
+    const computeVowel = (key)=>{
+      let ord = VOWEL_INDEX[key];
+      if (inW && key==='O') ord = 5; // W+O => ə
+      return String.fromCodePoint(base + ord);
+    };
+    VOWELS.forEach(k => targets[k] = { text: computeVowel(k), color: "#1a73e8" });
+
+    // Rule #1: Synthetic W (+7 only) => blank ALL vowels + K
+    if (isSynthetic){ VOWELS.forEach(k => targets[k].text = ''); targets.K.text = ''; }
+
+    // Rule #2: Canonical W-series => show ALL vowels (no blanking)
+
+    return targets;
   }
 
-  function kPreview(ch){
-    const cp = ch.codePointAt(0);
-    const base = baseOf(cp);
-    const baseChar = String.fromCodeCodePoint ? String.fromCodeCodePoint(base) : String.fromCodePoint(base);
-    const first = String.fromCodePoint(base + 5);   // 5형
-    const wBase = wSeriesBaseMap.get(baseChar);
-    const second = wBase ? wBase : String.fromCodePoint(base + 7); // w-base or 7형
-    return first + second; // 붙여쓰기 (공백 제거)
-  }
+  function paint(tg){
+    const setText = (sel, s)=>{ const el = kb.querySelector(sel); if (el) el.textContent = s; };
+    const setColor= (sel, c)=>{ const el = kb.querySelector(sel); if (el) el.style.color = c; };
 
-  function setText(sel, text, forceShow=false){
-    const el = kb.querySelector(sel);
-    if (!el) return;
-    el.textContent = text;
-    if (forceShow) el.style.display = 'block';
-  }
-
-  function resetPreviewsToDefault(){
-    setText('[data-role="next"] .lbl', '⬈', true);
-    (function(){const el = kb.querySelector('[data-role="next"] .lbl'); if(el) el.style.color = '#999';})();
-    setText('[data-role="k"] .lbl', defaults['[data-role="k"] .lbl'] || 'K');
-    (function(){const el = kb.querySelector('[data-role="k"] .lbl'); if(el) el.style.color = '#999';})();
-    ['U','I','O','J','L'].forEach(ch=>{
-      const sel = `[data-vowel="${ch}"] .lbl`;
-      setText(sel, defaults[sel] || ch);
-      const el = kb.querySelector(sel);
-      if(el) el.style.color = '#999';
-    });
-	const h = kb.querySelector('[data-role="next"] .hint-circle');
-	if(h) h.style.display = 'block';
-
+    setText('[data-role="next"] .lbl', tg.next.text);
+    { const el = kb.querySelector('[data-role="next"] .lbl'); if (el) el.style.color = tg.next.color || '#999'; }
+    const hint = kb.querySelector('[data-role="next"] .hint-circle'); if (hint) hint.style.display = tg.next.hint ? 'block' : 'none';
+    const wh = kb.querySelector('[data-role=\"next\"] .w-hint'); if (wh) wh.style.display = tg.next.hint ? 'block' : 'none';
+    setText('[data-role="k"] .lbl', tg.K.text);
+    { const el = kb.querySelector('[data-role="k"] .lbl'); if (el) el.style.color = tg.K.color || '#999'; }
+    ['U','I','O','J','L'].forEach(k => { setText(`[data-vowel="${k}"] .lbl`, tg[k].text); { const el = kb.querySelector(`[data-vowel=\"${k}\"] .lbl`); if (el) el.style.color = (tg.isIdle ? '#999' : '#1a73e8'); }if (tg[k].text) setColor(`[data-vowel="${k}"] .lbl`, tg[k].color); });
   }
 
   function updatePreviews(){
-    // reset rule: if last char is whitespace or no Ethiopic char exists → defaults
-    const lastEth = lastEthiopicChar();
-    if (!lastEth || endsWithWhitespace()){
-      resetPreviewsToDefault();
-      return;
-    }
-    // NEXT
-    const next = nextOf(lastEth);
-    setText('[data-role="next"] .lbl', next || '⬈', true);
-    (function(){const el = kb.querySelector('[data-role="next"] .lbl'); if(el) el.style.color = '#1a73e8';})();
-    // K
-    setText('[data-role="k"] .lbl', kPreview(lastEth));
-    (function(){const el = kb.querySelector('[data-role="k"] .lbl'); if(el) el.style.color = '#1a73e8';})();
-    // Vowels
-    [['U'],['I'],['O'],['J'],['L']].forEach(([key])=>{
-      setText(`[data-vowel="${key}"] .lbl`, vowelPreview(lastEth, key));
-    const el = kb.querySelector(`[data-vowel="${key}"] .lbl`);
-    if(el) el.style.color = '#1a73e8';
-    });
-	const h = kb.querySelector('[data-role="next"] .hint-circle');
-	if(h) h.style.display = 'none';
-
+    paint(computeTargets());
   }
 
-  // updates after any click and on load
-  kb.addEventListener('click', ()=> setTimeout(updatePreviews, 0));
-  window.addEventListener('load', ()=>{ resetPreviewsToDefault(); updatePreviews(); });
+  function safe(){ try{ updatePreviews(); }catch(e){} }
 
-  // Help modal (unchanged)
-  const helpBtn = document.getElementById('helpBtn');
-  const helpModal = document.getElementById('helpModal');
-  const helpClose = document.getElementById('helpClose');
-  if(helpBtn && helpModal){
-    const open = ()=>{ helpModal.style.display='flex'; };
-    const close = ()=>{ helpModal.style.display='none'; };
-    helpBtn.addEventListener('click', open);
-    helpClose && helpClose.addEventListener('click', close);
-    helpModal.addEventListener('click', (e)=>{ if(e.target===helpModal) close(); });
-  }
+  window.addEventListener('load', safe);
+  kb.addEventListener('click', ()=> setTimeout(safe, 0));
+  kb.addEventListener('pointerup', ()=> setTimeout(safe, 0));
+
+  // debug
+  window.updatePreviews = updatePreviews;
 })();
-const editor = document.getElementById('editor');
-editor.addEventListener('focus', () => {
-  setTimeout(() => window.scrollTo(0,0), 0);
-});
-
 </script>
 
+<script>
+(function(){
+  const kb = document.getElementById('kb');
+  const out = document.getElementById('editor');
+  if (!kb || !out) return;
+
+  const isEth = (cp)=> cp>=0x1200 && cp<=0x137F;
+  const baseOf = (cp)=> cp - (cp % 8);
+
+  // W-series maps (canonical)
+  const wSeriesBaseMap = new Map(Object.entries({"ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"}));
+  const wSeriesRev = new Map(Array.from(wSeriesBaseMap.entries()).map(([k,v])=>[v,k]));
+
+  // layout groups for anchor cycle
+  const layoutGroups = {
+    Q: ["ገ","ጘ"], W: ["ወ","ፀ"], E: ["የ","ጸ"], R: ["አ","ጰ"], T: ["ቀ","ቐ"], Y: ["ዘ","ዠ"],
+    A: ["ተ","ፐ"], S: ["ረ","ፈ"], D: ["ነ","ኘ"], F: ["መ","ሐ"], G: ["ከ","ኸ"], H: ["ጠ","ጨ"],
+    Z: ["ደ","ጀ"], X: ["ሰ","ሸ"], C: ["ለ","ኀ"], V: ["በ","ቨ"], B: ["ሀ","ሠ"], N: ["ቸ","ዐ"]
+  };
+  const baseToGroup = new Map(); for (const arr of Object.values(layoutGroups)) for (const c of arr) baseToGroup.set(c, arr);
+
+  function lastEth(){
+    const t = out.textContent || "እ"; const arr = Array.from(t);
+    for (let i=arr.length-1;i>=0;i--){ const cp = arr[i].codePointAt(0); if (isEth(cp)) return arr[i]; }
+    return null;
+  }
+
+  function cycleAnchorOnce(){
+    const t = out.textContent || "እ"; if (!t) return;
+    const arr = Array.from(t); const i = arr.length-1;
+    const ch = lastEth(); if (!ch) return;
+    const cp = ch.codePointAt(0);
+    if (!isEth(cp)) return;
+
+    const base = baseOf(cp);
+    const baseChar = String.fromCodePoint(base);
+
+    // root char for grouping (reverse from W base if needed)
+    const rootChar = wSeriesRev.get(baseChar) || baseChar;
+    const group = baseToGroup.get(rootChar);
+    if (!group || group.length < 2) return;
+
+    const [root, sub] = group;
+    const wBaseOf = (c)=>{ const m=wSeriesBaseMap.get(c); return m?m.codePointAt(0):(c.codePointAt(0)+7); };
+
+    const cpBase  = root.codePointAt(0);
+    const cpSub   = sub.codePointAt(0);
+    const cpBaseW = wBaseOf(root);
+    const cpSubW  = wBaseOf(sub);
+
+    const anchors = [cpSub, cpBaseW, cpSubW, cpBase]; // 1 → 2 → 3 → 0
+    if (!anchors.includes(cp)) return; // not at an anchor → do nothing
+
+    const idx = anchors.indexOf(cp);
+    const next = anchors[(idx+1) % anchors.length];
+    arr[i] = String.fromCodePoint(next);
+    out.textContent = arr.join("");
+  }
+
+  // Intercept NEXT clicks (prevent old handler if any), then anchor-cycle only
+  kb.addEventListener('click', function(ev){
+    const btn = ev.target.closest('[data-role="next"]');
+    if (!btn) return;
+    ev.preventDefault(); ev.stopPropagation();
+    cycleAnchorOnce();
+    try{ if (typeof updatePreviews==='function') updatePreviews(); }catch(e){}
+  }, true);
+})();
+</script>
+
+<script>
+(function(){
+  const kb = document.getElementById('kb');
+  const out = document.getElementById('editor');
+  if (!kb || !out) return;
+
+  function isIdle(){
+    const t = out.textContent || "";
+    if (!t) return true;
+    return /\s$/.test(t) && !/[\u1200-\u137F]/.test(t.slice(0,-1)); // trailing space with no Ethiopic before it
+  }
+
+  function paintIdleGray(){
+    const gray = '#999';
+    const setColor = sel => { const el = kb.querySelector(sel); if (el) el.style.color = gray; };
+    // labels unchanged (use whatever initial glyphs are in DOM), only color = gray
+    setColor('[data-role="next"] .lbl');
+    setColor('[data-role="k"] .lbl');
+    ['U','I','O','J','L'].forEach(k => setColor(`[data-vowel="${k}"] .lbl`));
+    const hint = kb.querySelector('[data-role="next"] .hint-circle'); if (hint) hint.style.display = 'block';
+    const wh = kb.querySelector('[data-role="next"] .w-hint'); if (wh) wh.style.display = 'block';
+  }
+
+  function ensureIdleOnLoad(){
+    if (isIdle()) paintIdleGray();
+  }
+
+  // Run at DOM ready & load, after other modules
+  document.addEventListener('DOMContentLoaded', ensureIdleOnLoad);
+  window.addEventListener('load', ensureIdleOnLoad);
+})();
+</script>
+
+<script>
+(function(){
+  const kb = document.getElementById('kb');
+  const out = document.getElementById('editor');
+  if (!kb || !out) return;
+
+  let kClickedAt = 0;
+  kb.addEventListener('click', (ev)=>{
+    const k = ev.target.closest('[data-role="k"]');
+    if (k) kClickedAt = Date.now();
+  }, true);
+
+  function justClickedK(){
+    return (Date.now() - kClickedAt) < 400; // within 400ms
+  }
+
+  function sanitizeLeadingE(){
+    const t = out.textContent || "";
+    if (t.length >= 1 && t.charAt(0) === 'እ' && !justClickedK()){
+      // Remove ONLY the very first እ once, keep rest intact
+      out.textContent = t.slice(1);
+    }
+  }
+
+  // Sanitize on first mutations
+  out.addEventListener('input', sanitizeLeadingE);
+  out.addEventListener('keyup', sanitizeLeadingE);
+})();
+</script>
+
+<script>
+(function(){
+  const kb = document.getElementById('kb');
+  const out = document.getElementById('editor');
+  if (!kb || !out) return;
+
+  function isIdle(){
+    const t = out.textContent || "";
+    if (!t) return true;
+    const endsSpace = /\s$/.test(t);
+    const hasEth = /[\u1200-\u137F]/.test(t);
+    const before = t.slice(0,-1);
+    const hasEthBefore = /[\u1200-\u137F]/.test(before);
+    return (!hasEth) || (endsSpace && !hasEthBefore);
+  }
+
+  function colorIdleGray(){
+    const gray = '#999';
+    const sel = s => kb.querySelector(s);
+    if (isIdle()){
+      const arr = ['U','I','O','J','L'];
+      const kLbl = sel('[data-role="k"] .lbl'); if (kLbl) kLbl.style.color = gray;
+      arr.forEach(v => { const el = sel(`[data-vowel="${v}"] .lbl`); if (el) el.style.color = gray; });
+      const nLbl = sel('[data-role="next"] .lbl'); if (nLbl) nLbl.style.color = gray;
+      const hint = sel('[data-role="next"] .hint-circle'); if (hint) hint.style.display = 'block';
+      const wh = sel('[data-role="next"] .w-hint'); if (wh) wh.style.display = 'block';
+    }
+  }
+
+  function safe(){ try{ colorIdleGray(); }catch(e){} }
+
+  // run after clicks and keyups to fight any premature blue
+  document.addEventListener('click', ()=> setTimeout(safe, 0));
+  out.addEventListener('input', ()=> setTimeout(safe, 0));
+  out.addEventListener('keyup',  ()=> setTimeout(safe, 0));
+  window.addEventListener('load', safe);
+})();
+</script>
+
+<script>
+(function(){
+  const kb = document.getElementById('kb');
+  const out = document.getElementById('editor');
+  if (!kb || !out) return;
+
+  function isIdle(){ const t = out.textContent || ""; return t.length === 0 || /\s$/.test(t); }
+  function paintIdleIfNeeded(){
+    if (!isIdle()) return;
+    const gray = '#999';
+    const sel = s => kb.querySelector(s);
+    ['U','I','O','J','L'].forEach(v => { const el = sel(`[data-vowel="${v}"] .lbl`); if (el) el.style.color = gray; });
+    const kLbl = sel('[data-role="k"] .lbl');   if (kLbl) kLbl.style.color = gray;
+    const nLbl = sel('[data-role="next"] .lbl');if (nLbl) nLbl.style.color = gray;
+    const hint = sel('[data-role="next"] .hint-circle'); if (hint) hint.style.display = 'block';
+    const wh = sel('[data-role="next"] .w-hint'); if (wh) wh.style.display = 'block';
+  }
+
+  function safe(){ try{ paintIdleIfNeeded(); }catch(e){} }
+  // Run after typical interactions
+  document.addEventListener('click', ()=> setTimeout(safe, 0));
+  out.addEventListener('input', ()=> setTimeout(safe, 0));
+  out.addEventListener('keyup',  ()=> setTimeout(safe, 0));
+  window.addEventListener('load', safe);
+})();
+</script>
+
+<script>
+(function(){
+  const out = document.getElementById('editor');
+  if (!out) return;
+  function killStrayLeadingE(){
+    const t = out.textContent || "";
+    if (t.startsWith('እ') && !/^[\u1200-\u137F]/.test(t.slice(1))){
+      // If first is እ and the next isn't Ethiopic (or doesn't exist), drop the first እ once.
+      out.textContent = t.slice(1);
+    }
+  }
+  out.addEventListener('input', ()=> setTimeout(killStrayLeadingE, 0));
+})();
+</script>
+<script>
+(function(){
+  const btn   = document.getElementById('helpBtn');
+  const modal = document.getElementById('helpModal');
+  const close = document.getElementById('helpClose');
+
+  if (btn && modal) {
+    btn.addEventListener('click', ()=>{
+      modal.style.display = 'flex';
+    });
+  }
+  if (close && modal) {
+    close.addEventListener('click', ()=>{
+      modal.style.display = 'none';
+    });
+  }
+  // 모달 바깥 클릭 시 닫기
+  if (modal) {
+    modal.addEventListener('click', (e)=>{
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  }
+})();
+</script>
 
 </body>
 </html>

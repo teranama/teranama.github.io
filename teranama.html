@@ -422,14 +422,14 @@ window.addEventListener('resize', fit);
 const kb = document.getElementById('bgwrap');
 const keyPos = {
   // 1행
-  KeyQ:{x:309,y:476}, KeyW:{x:356,y:476}, KeyE:{x:402,y:476}, KeyR:{x:448,y:476},
-  KeyT:{x:494,y:476}, KeyY:{x:561,y:476}, KeyU:{x:607,y:476}, KeyI:{x:653,y:476}, KeyO:{x:700,y:476},
+  KeyQ:{x:309,y:474}, KeyW:{x:356,y:474}, KeyE:{x:402,y:474}, KeyR:{x:448,y:474},
+  KeyT:{x:495,y:474}, KeyY:{x:561,y:474}, KeyU:{x:607,y:474}, KeyI:{x:653,y:474}, KeyO:{x:700,y:474},
   // 2행
   KeyA:{x:320,y:512}, KeyS:{x:367,y:512}, KeyD:{x:413,y:512}, KeyF:{x:460,y:512},
-  KeyG:{x:506,y:512}, KeyH:{x:572,y:512}, KeyJ:{x:618,y:512}, KeyK:{x:665,y:512}, KeyL:{x:711,y:512},
+  KeyG:{x:506,y:512}, KeyH:{x:573,y:512}, KeyJ:{x:619,y:512}, KeyK:{x:666,y:512}, KeyL:{x:712,y:512},
   // 3행
   KeyZ:{x:345,y:549}, KeyX:{x:392,y:549}, KeyC:{x:438,y:549}, KeyV:{x:484,y:549},
-  KeyB:{x:529,y:549}, KeyN:{x:596,y:549}, KeyM:{x:643,y:549},
+  KeyB:{x:530,y:549}, KeyN:{x:597,y:549}, KeyM:{x:644,y:549},
 };
 
 function flashAt(x,y){
@@ -457,12 +457,12 @@ window.addEventListener('keydown', e=>{
       font-family:"Abyssinica SIL","Noto Sans Ethiopic",system-ui,-apple-system,Arial,sans-serif !important;
       font-weight:400 !important;
     }
-    #preview-NEXT{ position:absolute; transform:translate(-80%,-40%) !important; font-size:22px !important; }
+    #preview-NEXT{ position:absolute; transform:translate(-50%,-40%) !important; font-size:22px !important; }
     #preview-NEXT.default::after{
       content:''; position:absolute;
       width:12px; height:12px; border-radius:50%;
       border:2px dotted #999;
-      top:0px; right:-12px;
+      top:0px; right:14px;
     }`;
   document.head.appendChild(style);
 
@@ -470,11 +470,11 @@ window.addEventListener('keydown', e=>{
   function getText(){ return out.classList.contains('placeholder') ? '' : out.value; }
 
   const keyPos={
-    KeyU:{x:607,y:476}, KeyI:{x:653,y:476}, KeyO:{x:700,y:476},
+    KeyU:{x:607,y:474}, KeyI:{x:653,y:474}, KeyO:{x:700,y:474},
     KeyJ:{x:618,y:512}, KeyK:{x:665,y:512}, KeyL:{x:711,y:512},
     KeyM:{x:643,y:549}
   };
-  const defaults={KeyU:'ኡ',KeyI:'ኢ',KeyO:'ኦ',KeyJ:'ኣ',KeyK:'እዉ',KeyL:'ኤ',KeyM:'⬈'};
+  const defaults={KeyU:'ኡ',KeyI:'ኢ',KeyO:'ኦ',KeyJ:'ኣ',KeyK:'እ',KeyL:'ኤ',KeyM:'⬈'};
   const idMap={KeyU:'preview-U',KeyI:'preview-I',KeyO:'preview-O',KeyJ:'preview-J',KeyK:'preview-K',KeyL:'preview-L',KeyM:'preview-NEXT'};
   const container=document.getElementById('previewLabels');
   for(const code in keyPos){
@@ -518,7 +518,7 @@ window.addEventListener('keydown', e=>{
     setLabel('preview-I','ኢ','#999');
     setLabel('preview-O','ኦ','#999');
     setLabel('preview-J','ኣ','#999');
-    setLabel('preview-K','እዉ','#999');
+    setLabel('preview-K','እ','#999');
     setLabel('preview-L','ኤ','#999');
     setLabel('preview-NEXT','⬈','#999',{defaultState:true});
   }
@@ -544,5 +544,473 @@ window.addEventListener('keydown', e=>{
   document.addEventListener('keydown',()=>setTimeout(()=>{try{window.__updatePrev();}catch(_){ }},0),true);
 })();
 </script>
+
+<!-- === Override Patch (non-intrusive) === -->
+<script>
+(function(){
+  try{
+    // 1) K도 모음키로: VOWEL_INDEX에 5 추가
+    if (typeof VOWEL_INDEX === 'object') {
+      VOWEL_INDEX.K = 5;
+    }
+
+    // 2) onKeyPressLetter K 분기 override
+    if (typeof onKeyPressLetter === 'function') {
+      const _orig_onKeyPressLetter = onKeyPressLetter;
+      window.onKeyPressLetter = function(k){
+        if (k === 'K') { if (typeof onVowelKey==='function') onVowelKey('K'); return; }
+        if (k === 'M') { if (typeof onExpandPress==='function') onExpandPress(); return; }
+        return _orig_onKeyPressLetter(k);
+      };
+    }
+
+    // 3) wSeriesRev 준비 (역매핑)
+    if (typeof wSeriesRev === 'undefined' && typeof wSeriesBaseMap === 'object') {
+      window.wSeriesRev = new Map(Array.from(wSeriesBaseMap.entries()).map(([k,v])=>[v,k]));
+    }
+
+    // 4) M키: 3-스테이지(서브 루트 → 기본 루트 와 → 서브 루트 와 → 서브 루트 …) 루트 직후만
+    window.onExpandPress = function(){
+      const prev = typeof getText==='function' ? getText() : document.getElementById('output').value;
+      if (!prev) { if(typeof beep==='function')beep(); return; }
+      const chars = Array.from(prev);
+      const i = chars.length - 1;
+      const cp = chars[i].codePointAt(0);
+      if (typeof isEthiopic==='function' && !isEthiopic(cp)) { if(typeof beep==='function')beep(); return; }
+
+      const base = (typeof getSeriesBase==='function') ? getSeriesBase(cp) : (cp - (cp%8));
+      const baseChar = String.fromCodePoint(base);
+      const baseCharRoot = (window.wSeriesRev && wSeriesRev.get(baseChar)) || baseChar;
+      const group = (typeof baseToGroup!=='undefined') ? baseToGroup.get(baseCharRoot) : null;
+      if (!group || group.length < 2) { if(typeof beep==='function')beep(); return; }
+
+      const baseRoot = group[0], subRoot = group[1];
+      const wBaseOf = (ch) => {
+        const mapped = (typeof wSeriesBaseMap!=='undefined') ? wSeriesBaseMap.get(ch) : null;
+        return mapped ? mapped.codePointAt(0) : ch.codePointAt(0) + 7;
+      };
+
+      const cpBase  = baseRoot.codePointAt(0);
+      const cpSub   = subRoot.codePointAt(0);
+      const cpBaseW = wBaseOf(baseRoot);
+      const cpSubW  = wBaseOf(subRoot);
+
+      // Only allow cycle when current cp is one of the 4 stage anchors.
+      if (cp!==cpBase && cp!==cpSub && cp!==cpBaseW && cp!==cpSubW) { if(typeof beep==='function')beep(); return; }
+
+      let next;
+      if      (cp === cpBase)  next = cpSub;   // base -> sub
+      else if (cp === cpSub)   next = cpBaseW; // sub  -> base w
+      else if (cp === cpBaseW) next = cpSubW;  // base w -> sub w
+      else if (cp === cpSubW)  next = cpSub;   // sub w -> sub
+
+      chars[i] = String.fromCodePoint(next);
+      if (typeof setText==='function') setText(chars.join(""));
+      else document.getElementById('output').value = chars.join("");
+    };
+
+    // 5) Preview 덮어쓰기: K는 ə, NEXT는 expandPreview(동일 3-스테이지)
+    if (typeof __updatePrev === 'function') {
+      const _orig_updatePrev = __updatePrev;
+      const baseOf=cp=>cp-(cp%8);
+      const wOf=(c)=>{const m=wSeriesBaseMap.get(c); return m?m:String.fromCodePoint(c.codePointAt(0)+7);};
+      function kPreview(ch){ const cp=ch.codePointAt(0); const base=baseOf(cp); return String.fromCodePoint(base+5); }
+      function expandPreview(ch){
+        const cp=ch.codePointAt(0), base=baseOf(cp), order=cp-base;
+        if(order!==0) return '⬈';
+        const baseChar=String.fromCodePoint(base);
+        const baseCharRoot=(window.wSeriesRev&&wSeriesRev.get(baseChar))||baseChar;
+        const group=baseToGroup.get(baseCharRoot); if(!group||group.length<2) return '⬈';
+        const baseRoot=group[0], subRoot=group[1];
+        const stages=[ subRoot.codePointAt(0), wOf(baseRoot).codePointAt(0), wOf(subRoot).codePointAt(0) ];
+        const idx=stages.indexOf(cp);
+        const nextCp = (idx===-1)?stages[0]:stages[(idx+1)%stages.length];
+        return String.fromCodePoint(nextCp);
+      }
+      const setLabel = window.setLabel || function(id,text,color,opts){
+        const el=document.getElementById(id); if(!el) return;
+        el.textContent=text; el.style.color=color||'#1a73e8';
+        if(id==='preview-NEXT'){
+          if(opts && opts.defaultState) el.classList.add('default');
+          else el.classList.remove('default');
+        }
+      };
+      window.__updatePrev = function(){
+        try{
+          const lastEth = (function(){const t=(typeof getText==='function'?getText():document.getElementById('output').value);
+              const arr=Array.from(t); for(let i=arr.length-1;i>=0;i--){const cp=arr[i].codePointAt(0);
+                if(cp>=0x1200&&cp<=0x137F) return arr[i];} return null;})();
+          const endsWS = (/\s$/.test(typeof getText==='function'?getText():document.getElementById('output').value));
+          if(!lastEth||endsWS){
+            setLabel('preview-U','ኡ','#999');
+            setLabel('preview-I','ኢ','#999');
+            setLabel('preview-O','ኦ','#999');
+            setLabel('preview-J','ኣ','#999');
+            setLabel('preview-L','ኤ','#999');
+            setLabel('preview-K','እ','#999');
+            setLabel('preview-NEXT','⬈','#999',{defaultState:true});
+          }else{
+            // reuse vowelPreview from original if present; else approximate via base+index
+            const baseOf=cp=>cp-(cp%8);
+            const vowel5 = (ch)=>{ const cp=ch.codePointAt(0); const base=baseOf(cp); return String.fromCodePoint(base+5); };
+            const vowelIdx=(ch,idx)=>{ const cp=ch.codePointAt(0); const base=baseOf(cp); return String.fromCodePoint(base+idx); };
+            setLabel('preview-U',vowelIdx(lastEth,1),'#1a73e8');
+            setLabel('preview-I',vowelIdx(lastEth,2),'#1a73e8');
+            setLabel('preview-O',vowelIdx(lastEth,6),'#1a73e8');
+            setLabel('preview-J',vowelIdx(lastEth,3),'#1a73e8');
+            setLabel('preview-L',vowelIdx(lastEth,4),'#1a73e8');
+            setLabel('preview-K',vowel5(lastEth),'#1a73e8');
+            setLabel('preview-NEXT',expandPreview(lastEth)||'⬈','#1a73e8',{defaultState:false});
+          }
+        }catch(e){
+          _orig_updatePrev();
+        }
+      };
+    }
+
+  }catch(e){ console.warn('Override patch failed:', e); }
+})();
+</script>
+
+
+<!-- === Minimal M-key override: 1230 cycle only === -->
+<script>
+(function(){
+  try{
+    // Ensure reverse map exists (for safety)
+    if (typeof wSeriesRev === 'undefined' && typeof wSeriesBaseMap === 'object') {
+      window.wSeriesRev = new Map(Array.from(wSeriesBaseMap.entries()).map(([k,v])=>[v,k]));
+    }
+
+    // M cycle: sub(1) -> baseW(2) -> subW(3) -> base(0) -> repeat
+    window.onExpandPress = function(){
+      const out = document.getElementById('output');
+      const prev = (typeof getText==='function') ? getText() : (out?out.value:"");
+      if (!prev) { if(typeof beep==='function')beep(); return; }
+      const chars = Array.from(prev);
+      const i = chars.length - 1;
+      const cp = chars[i].codePointAt(0);
+      if (typeof isEthiopic==='function' && !isEthiopic(cp)) { if(typeof beep==='function')beep(); return; }
+
+      const base = (typeof getSeriesBase==='function') ? getSeriesBase(cp) : (cp - (cp%8));
+      const baseChar = String.fromCodePoint(base);
+      const baseCharRoot = (typeof wSeriesRev!=='undefined' && wSeriesRev.get(baseChar)) || baseChar;
+      const group = (typeof baseToGroup!=='undefined') ? baseToGroup.get(baseCharRoot) : null;
+      if (!group || group.length < 2) { if(typeof beep==='function')beep(); return; }
+
+      const baseRoot = group[0], subRoot = group[1];
+      const wBaseOf = (ch) => {
+        const mapped = (typeof wSeriesBaseMap!=='undefined') ? wSeriesBaseMap.get(ch) : null;
+        return mapped ? mapped.codePointAt(0) : ch.codePointAt(0) + 7;
+      };
+
+      const cpBase  = baseRoot.codePointAt(0);
+      const cpSub   = subRoot.codePointAt(0);
+      const cpBaseW = wBaseOf(baseRoot);
+      const cpSubW  = wBaseOf(subRoot);
+
+      const anchors = [cpBase, cpSub, cpBaseW, cpSubW];
+      if (!anchors.includes(cp)) { if(typeof beep==='function')beep(); return; }
+
+      const stages = [cpSub, cpBaseW, cpSubW, cpBase]; // 1,2,3,0
+      let idx = stages.indexOf(cp);
+      if (idx === -1) idx = stages.length - 1; // if at base, next is sub
+      const next = stages[(idx+1)%stages.length];
+
+      chars[i] = String.fromCodePoint(next);
+      if (typeof setText==='function') setText(chars.join(""));
+      else if(out) out.value = chars.join("");
+    };
+
+    // Route M to onExpandPress only (do not touch other keys)
+    if (typeof onKeyPressLetter === 'function') {
+      const __orig_onKeyPressLetter = onKeyPressLetter;
+      window.onKeyPressLetter = function(k){
+        if (k === 'M') { if (typeof onExpandPress==='function') onExpandPress(); return; }
+        return __orig_onKeyPressLetter(k);
+      };
+    }
+  }catch(e){ /* silent */ }
+})();
+</script>
+
+
+<!-- === Minimal Preview Override: blank unsupported vowels in w-series === -->
+<script>
+(function(){
+  try{
+    // Helper to safely get last Ethiopic char
+    function __lastEth(){
+      const out = document.getElementById('output');
+      const t = (typeof getText==='function') ? getText() : (out?out.value:"");
+      const arr = Array.from(t);
+      for (let i=arr.length-1;i>=0;i--){
+        const cp = arr[i].codePointAt(0);
+        if (cp>=0x1200 && cp<=0x137F) return arr[i];
+      }
+      return null;
+    }
+    // Wrapper around existing preview updater (if any)
+    const setLabel = window.setLabel || function(id,text,color,opts){
+      const el=document.getElementById(id); if(!el) return;
+      el.textContent = text;
+      if (color) el.style.color = color;
+      if(id==='preview-NEXT'){
+        if(opts && opts.defaultState) el.classList.add('default');
+        else el.classList.remove('default');
+      }
+    };
+
+    window.__updatePrev = (function(prev){
+      return function(){
+        // Run original first (if exists) to keep everything else identical
+        if (typeof prev === 'function') { try{ prev(); }catch(e){} }
+        try{
+          const last = __lastEth();
+          if (!last) return;
+          const cp = last.codePointAt(0);
+          const base = cp - (cp % 8);
+          const order = cp - base;
+          const baseChar = String.fromCodePoint(base);
+
+          // inW if explicit w-base or synthetic +7
+          const wSeriesBaseMap = new Map(Object.entries({"ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"}));
+          const wBaseSet = new Set([...wSeriesBaseMap.values()]);
+          const inW = (order === 7) || wBaseSet.has(baseChar);
+
+          if (inW){
+            // Blank out unsupported vowels (U, I, J, L) — KEEP K & O as-is
+            setLabel('preview-U','', '#999');
+            setLabel('preview-I','', '#999');
+            setLabel('preview-J','', '#999');
+            setLabel('preview-L','', '#999');
+          }
+        }catch(e){}
+      };
+    })(window.__updatePrev);
+  }catch(e){}
+})();
+</script>
+
+
+<!-- === Preview rule: single-wa-only series => show only J, others blank === -->
+<script>
+(function(){
+  try{
+    // canonical 5 w-series bases (already in the page earlier)
+    const wSeriesBaseMap = new Map(Object.entries({"ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"}));
+    const canonicalW = new Set([...wSeriesBaseMap.values()]); // {ጐ, ቈ, ቘ, ኰ, ኈ}
+
+    function __lastEth(){
+      const out = document.getElementById('output');
+      const t = (typeof getText==='function') ? getText() : (out?out.value:"");
+      const arr = Array.from(t);
+      for (let i=arr.length-1;i>=0;i--){
+        const cp = arr[i].codePointAt(0);
+        if (cp>=0x1200 && cp<=0x137F) return arr[i];
+      }
+      return null;
+    }
+    function __baseOf(cp){ return cp - (cp % 8); }
+
+    const __setLabel = window.setLabel || function(id,text,color,opts){
+      const el=document.getElementById(id); if(!el) return;
+      el.textContent = text;
+      if (color) el.style.color = color;
+      if(id==='preview-NEXT'){
+        if(opts && opts.defaultState) el.classList.add('default');
+        else el.classList.remove('default');
+      }
+    };
+
+    // Wrap/override preview after existing one runs
+    window.__updatePrev = (function(prev){
+      return function(){
+        if (typeof prev === 'function') { try{ prev(); }catch(e){} }
+        try{
+          const last = __lastEth(); if (!last) return;
+          const cp = last.codePointAt(0);
+          const base = __baseOf(cp);
+          const order = cp - base; // 0..7
+          const baseChar = String.fromCodePoint(base);
+
+          // inW if explicit canonical base or synthetic +7
+          const isCanonicalW = canonicalW.has(baseChar);
+          const isSyntheticW = (order === 7) && !isCanonicalW;
+          if (isSyntheticW){
+            // single-wa-only: show only J; blank others (U/I/L/K/O)
+            __setLabel('preview-U','', '#999');
+            __setLabel('preview-I','', '#999');
+            __setLabel('preview-L','', '#999');
+            __setLabel('preview-K','', '#999');
+            __setLabel('preview-O','', '#999');
+            // keep J as whatever original preview set (do not touch)
+          }
+        }catch(e){}
+      };
+    })(window.__updatePrev);
+  }catch(e){}
+})();
+</script>
+
+
+<!-- === FINAL preview override (canonical W shows full set; synthetic W shows only J) === -->
+<script>
+(function(){
+  try{
+    const canonicalW = new Set(["ጐ","ቈ","ቘ","ኰ","ኈ"]);
+    function __lastEth(){
+      const out = document.getElementById('output');
+      const t = (typeof getText==='function') ? getText() : (out?out.value:"");
+      const arr = Array.from(t);
+      for (let i=arr.length-1;i>=0;i--){
+        const cp = arr[i].codePointAt(0);
+        if (cp>=0x1200 && cp<=0x137F) return arr[i];
+      }
+      return null;
+    }
+    function __baseOf(cp){ return cp - (cp % 8); }
+    function __setLabel(id,text,color){
+      const el=document.getElementById(id); if(!el) return;
+      el.textContent = text;
+      if (color) el.style.color = color;
+    }
+
+    // wrap to run *after* any previous preview updates
+    const __prev = window.__updatePrev;
+    window.__updatePrev = function(){
+      if (typeof __prev === 'function') { try{ __prev(); }catch(e){} }
+      try{
+        const last = __lastEth(); if (!last) return;
+        const cp = last.codePointAt(0);
+        const base = __baseOf(cp);
+        const order = cp - base; // 0..7
+        const baseChar = String.fromCodePoint(base);
+
+        const inCanonical = canonicalW.has(baseChar);
+        const inSynthetic = (order === 7) && !inCanonical;
+
+        if (inCanonical){
+          // full W base: U/I/J/L/O active (O=>5)
+          __setLabel('preview-U', String.fromCodePoint(base + 1), '#1a73e8');
+          __setLabel('preview-I', String.fromCodePoint(base + 2), '#1a73e8');
+          __setLabel('preview-J', String.fromCodePoint(base + 3), '#1a73e8');
+          __setLabel('preview-L', String.fromCodePoint(base + 4), '#1a73e8');
+          __setLabel('preview-O', String.fromCodePoint(base + 5), '#1a73e8');
+          // K 라벨은 기존 로직 유지
+          return;
+        }
+        if (inSynthetic){
+          // single-wa-only: show only J
+          __setLabel('preview-U','', '#999');
+          __setLabel('preview-I','', '#999');
+          __setLabel('preview-L','', '#999');
+          __setLabel('preview-K','', '#999');
+          __setLabel('preview-O','', '#999');
+          // J는 그대로 (이미 찍혀 있음)
+          return;
+        }
+      }catch(e){}
+    };
+  }catch(e){}
+})();
+</script>
+
+
+<!-- === NEXT preview final rule: default '⬈ዉ' gray; active shows next cycle; vowels -> inactive === -->
+<script>
+(function(){
+  try{
+    function __lastEth(){
+      const out = document.getElementById('output');
+      const t = (typeof getText==='function') ? getText() : (out?out.value:"");
+      const arr = Array.from(t);
+      for (let i=arr.length-1;i>=0;i--){
+        const cp = arr[i].codePointAt(0);
+        if (cp>=0x1200 && cp<=0x137F) return arr[i];
+      }
+      return null;
+    }
+    const baseOf = (cp)=>cp-(cp%8);
+    const isEth = (cp)=>cp>=0x1200&&cp<=0x137F;
+
+    // Helpers shared with the page
+    const wSeriesBaseMap = new Map(Object.entries({"ገ":"ጐ","ቀ":"ቈ","ቐ":"ቘ","ከ":"ኰ","ኀ":"ኈ"}));
+    const baseToGroup = (function(){
+      // reconstruct from layout already on page if needed
+      const layoutGroups={Q:["ገ","ጘ"],W:["ወ","ፀ"],E:["የ","ጸ"],R:["አ","ጰ"],T:["ቀ","ቐ"],Y:["ዘ","ዠ"],
+        A:["ተ","ፐ"],S:["ረ","ፈ"],D:["ነ","ኘ"],F:["መ","ሐ"],G:["ከ","ኸ"],H:["ጠ","ጨ"],
+        Z:["ደ","ጀ"],X:["ሰ","ሸ"],C:["ለ","ኀ"],V:["በ","ቨ"],B:["ሀ","ሠ"],N:["ቸ","ዐ"]};
+      const m=new Map(); for(const arr of Object.values(layoutGroups)) for(const ch of arr) m.set(ch,arr); return m;
+    })();
+
+    function nextCycleChar(ch){
+      const cp = ch.codePointAt(0); if(!isEth(cp)) return null;
+      const base = baseOf(cp);
+      const baseChar = String.fromCodePoint(base);
+      // get roots for the group of the *root* (strip w-base if needed)
+      const rootChar = (function(){
+        // if current is a w-base (canonical), find its root via reverse of map
+        for (const [root,w] of wSeriesBaseMap.entries()){
+          if (w === baseChar) return root;
+        }
+        // otherwise use baseChar as-is
+        return baseChar;
+      })();
+      const group = baseToGroup.get(rootChar); if(!group||group.length<2) return null;
+      const baseRoot = group[0], subRoot = group[1];
+
+      const cpBase  = baseRoot.codePointAt(0);
+      const cpSub   = subRoot.codePointAt(0);
+      const cpBaseW = (wSeriesBaseMap.get(baseRoot)||String.fromCodePoint(cpBase+7)).codePointAt(0);
+      const cpSubW  = (wSeriesBaseMap.get(subRoot )||String.fromCodePoint(cpSub +7)).codePointAt(0);
+
+      const anchors = [cpSub, cpBaseW, cpSubW, cpBase]; // 1230 cycle
+      if (!anchors.includes(cp)) return null;
+      const idx = anchors.indexOf(cp);
+      const next = anchors[(idx+1)%anchors.length];
+      return String.fromCodePoint(next);
+    }
+
+    function setNextInactive(){
+      const el = document.getElementById('preview-NEXT'); if(!el) return;
+      el.textContent = '⬈ዉ';
+      el.style.color = '#999';
+      el.classList.add('default');
+    }
+    function setNextActive(char){
+      const el = document.getElementById('preview-NEXT'); if(!el) return;
+      el.textContent = char || '⬈';
+      el.style.color = '#1a73e8';
+      el.classList.remove('default');
+    }
+
+    const __prev = window.__updatePrev;
+    window.__updatePrev = function(){
+      if (typeof __prev === 'function') { try{ __prev(); }catch(e){} }
+      try{
+        const last = __lastEth();
+        const out = document.getElementById('output');
+const t = (typeof getText==='function') ? getText() : (out ? out.value : "");
+const endsWS = /\s$/.test(t);
+
+if (!last || !t || endsWS){ 
+  setNextInactive(); 
+  return; 
+}
+
+        const next = nextCycleChar(last);
+        if (next){ setNextActive(next); } else { setNextInactive(); }
+      }catch(e){ /* ignore */ }
+    };
+
+    // initialize default
+    window.addEventListener('load', function(){
+      try{ setNextInactive(); }catch(e){}
+    });
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>
