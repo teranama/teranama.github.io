@@ -78,7 +78,7 @@
   text-shadow: none; /* 기본은 가짜 볼드 해제 */
 }
 
-/* ⟳ 아이콘일 때만 크게 + 가짜 볼드 보정 */
+/* ⇆ 아이콘일 때만 크게 + 가짜 볼드 보정 */
 .key[data-role="next"] .lbl.icon{
   font-size: 26px !important;
   text-shadow: 0.5px 0 currentColor, -0.5px 0 currentColor,
@@ -154,7 +154,7 @@
       </div>
       <div style="padding:14px 16px;font-size:14px;line-height:1.6">
         <ul style="margin:0;padding-left:18px">
-          <li>በአንድ ቁልፍ ላይ ያሉትን የኋላ ፊደሎች ለመጻፍ መጀመሪያ ያንን ቁልፍ ከዚያም የቀጣዩን መስፋፊያ (⟳) ይጫኑ።</li>
+          <li>በአንድ ቁልፍ ላይ ያሉትን የኋላ ፊደሎች ለመጻፍ መጀመሪያ ያንን ቁልፍ ከዚያም የቀጣዩን መስፋፊያ (⇆) ይጫኑ።</li>
           <li>መስፋፊያውን በተከታታይ ሁለት ጊዜ ካስጫኑ ዉ ይጻፋል።</li>
           <li>ግራጫ ቀለም ያላቸው የሞል ቁልፎች ብቻቸውን አይገቡም። መጀመሪያ ሥር ያለውን አ (አ) ይጫኑ።</li>
         </ul>
@@ -475,12 +475,12 @@ kb.addEventListener('click',(e)=>{
     if (!el) return;
     defaults[sel] = el.textContent || fallback || '';
   }
-  cacheDefault('[data-role="next"] .lbl', '⟳');
+  cacheDefault('[data-role="next"] .lbl', '⇆');
   cacheDefault('[data-role="k"] .lbl', 'K');
   ['U','I','O','J','L'].forEach(ch => cacheDefault(`[data-vowel="${ch}"] .lbl`, ch));
 
   function resetPreviewsToDefault(){
-    setText('[data-role="next"] .lbl', '⟳'); setColor('[data-role="next"] .lbl', '#999');
+    setText('[data-role="next"] .lbl', '⇆'); setColor('[data-role="next"] .lbl', '#999');
     setText('[data-role="k"] .lbl', defaults['[data-role="k"] .lbl'] || 'K'); setColor('[data-role="k"] .lbl', '#999');
     ['U','I','O','J','L'].forEach(k => { setText(`[data-vowel="${k}"] .lbl`, defaults[`[data-vowel="${k}"] .lbl`] || k); setColor(`[data-vowel="${k}"] .lbl`, '#999'); });
     const h = kb.querySelector('[data-role="next"] .hint-circle'); if (h) h.style.display = 'block';
@@ -508,7 +508,7 @@ function updatePreviews(){
   const endsWS = /\s$/.test(t);
 
   const targets = {
-    next: { text: "⟳", color: "#999", hint: true },
+    next: { text: "⇆", color: "#999", hint: true },
     K: { text: "K", color: "#999" },
     U: { text: "U", color: "#999" },
     I: { text: "I", color: "#999" },
@@ -521,10 +521,10 @@ function updatePreviews(){
     const setText = (sel, s)=>{ const el = kb.querySelector(sel); if (el) el.textContent = s; };
     const setColor = (sel, c)=>{ const el = kb.querySelector(sel); if (el) el.style.color = c; };
     setText('[data-role="next"] .lbl', targets.next.text); setColor('[data-role="next"] .lbl', targets.next.color);
-    { // ⟳일 때만 아이콘 클래스 부여
+    { // ⇆일 때만 아이콘 클래스 부여
   const el = kb.querySelector('[data-role="next"] .lbl');
   if (el){
-    if (targets.next.text === '⟳'){ el.classList.add('icon'); }
+    if (targets.next.text === '⇆'){ el.classList.add('icon'); }
     else { el.classList.remove('icon'); }
   }
 }
@@ -572,7 +572,7 @@ function updatePreviews(){
         const next=anchors[(idx+1)%anchors.length];
         targets.next = { text: String.fromCodePoint(next), color: "#1a73e8", hint: false };
       } else {
-        targets.next = { text: "⟳", color: "#999", hint: true };
+        targets.next = { text: "⇆", color: "#999", hint: true };
       }
     }
   })();
@@ -615,7 +615,7 @@ function updatePreviews(){
       setText('[data-role="next"] .lbl', next); setColor('[data-role="next"] .lbl', '#1a73e8');
       const h = kb.querySelector('[data-role="next"] .hint-circle'); if (h) h.style.display = 'none';
     }else{
-      setText('[data-role="next"] .lbl', '⟳'); setColor('[data-role="next"] .lbl', '#999');
+      setText('[data-role="next"] .lbl', '⇆'); setColor('[data-role="next"] .lbl', '#999');
       const h = kb.querySelector('[data-role="next"] .hint-circle'); if (h) h.style.display = 'block';
     }
 
@@ -693,7 +693,7 @@ function updatePreviews(){
 
   // Cache initial DOM labels (Ethiopic glyphs) for idle defaults
   const defaults = {
-    next: (kb.querySelector('[data-role="next"] .lbl') || {textContent:"⟳"}).textContent || "⟳",
+    next: (kb.querySelector('[data-role="next"] .lbl') || {textContent:"⇆"}).textContent || "⇆",
     K:    (kb.querySelector('[data-role="k"] .lbl')    || {textContent:"K"}).textContent || "እ",
     U:    (kb.querySelector('[data-vowel="U"] .lbl')   || {textContent:"U"}).textContent || "U",
     I:    (kb.querySelector('[data-vowel="I"] .lbl')   || {textContent:"I"}).textContent || "I",
@@ -724,7 +724,7 @@ function updatePreviews(){
 
     // defaults (gray)
     const targets = {
-      next: { text: "⟳", color: "#999", hint: true },
+      next: { text: "⇆", color: "#999", hint: true },
       K: { text: "K", color: "#999" },
       U: { text: "U", color: "#999" },
       I: { text: "I", color: "#999" },
@@ -766,7 +766,7 @@ function updatePreviews(){
           const next = anchors[(anchors.indexOf(cp)+1)%anchors.length];
           targets.next = { text: String.fromCodePoint(next), color: "#1a73e8", hint: false };
         } else {
-          targets.next = { text: "⟳", color: "#999", hint: true };
+          targets.next = { text: "⇆", color: "#999", hint: true };
         }
       }
     })();
@@ -798,10 +798,10 @@ function updatePreviews(){
     setText('[data-role="next"] .lbl', tg.next.text);
     { const el = kb.querySelector('[data-role="next"] .lbl'); if (el) el.style.color = tg.next.color || '#999'; }
     const hint = kb.querySelector('[data-role="next"] .hint-circle'); if (hint) hint.style.display = tg.next.hint ? 'block' : 'none';
-{ // ⟳일 때만 아이콘 클래스 부여
+{ // ⇆일 때만 아이콘 클래스 부여
   const el = kb.querySelector('[data-role="next"] .lbl');
   if (el){
-    if (tg.next.text === '⟳'){ el.classList.add('icon'); }
+    if (tg.next.text === '⇆'){ el.classList.add('icon'); }
     else { el.classList.remove('icon'); }
   }
 }
